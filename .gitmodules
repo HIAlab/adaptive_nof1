@@ -1,0 +1,3 @@
+[submodule "sinot"]
+	path = sinot
+	url = git@github.com:HIAlab/sinot.git
