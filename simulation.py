@@ -39,7 +39,7 @@ class Simulation:
         })
     
     def true_coefficients(self):
-        return {'mu_T': self.mu_T[0], 'mu_T_2': self.mu_T[1], 'alpha_T_1': self.alpha[0], 'alpha_T_2': self.alpha[1]}
+        return {'mu_T_1': self.mu_T[0], 'mu_T_2': self.mu_T[1], 'alpha_T_1': self.alpha[0], 'alpha_T_2': self.alpha[1]}
 
     def reference_values(self):
         return {'mu_T': self.mu_T, 'mu_p':self.mu_p, 'alpha': self.alpha, 'epsilon_i_sigma': epsilon_i_sigma }
