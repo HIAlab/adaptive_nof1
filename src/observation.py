@@ -4,23 +4,37 @@ import pandas as pd
 
 
 @dataclass
-class Observation:
+class Context:
     c: List[float]
-    treatments: List[float]
+
+
+@dataclass
+class Treatment:
+    i: int
+
+
+@dataclass
+class Outcome:
     y: List[float]
 
-    def linear_coefficients(self):
-        treatments = self.treatments
-        return pd.DataFrame(
-            {
-                "T_1": (treatments == 1) * 1,
-                "T_2": (treatments == 2) * 1,
-                "c_1": self.c * (treatments == 1),
-                "c_2": self.c * (treatments == 2),
-            }
-        )
 
-    def dataFrame(self):
-        lc = self.linear_coefficients()
-        lc["y"] = self.y
-        return lc
+@dataclass
+class Observation:
+    context: Context
+    treatment: Treatment
+    outcome: Outcome
+
+
+@dataclass
+class History:
+    observations: List[Observation]
+
+    def __len__(self):
+        return len(self.observations)
+
+    def add_outcome(self, outcome):
+        self.observations.append(outcome)
+
+    # TODO:
+    def linear_coefficients(self):
+        treatments = [observation.treatment for observation in observations]

@@ -1,24 +1,25 @@
 from abc import ABC, abstractmethod
 
 
-class AbstractPolicy(ABC):
+class Policy(ABC):
     def __init__(self, number_of_actions):
         self.number_of_actions = number_of_actions
 
     @abstractmethod
-    def choose_action(self, history):
+    def choose_action(self, history, context):
         pass
 
 
-class ConstantPolicy(AbstractPolicy):
+class ConstantPolicy(Policy):
     def __init__(self, number_of_actions, action):
         self.action = action
         super.__init__(number_of_actions)
 
-    def choose_action(self, _):
+    def choose_action(self, _, __):
         return self.action
 
-class FixedPolicy(AbstractPolicy):
-    def chose_action(self, history):
+
+class FixedPolicy(Policy):
+    def choose_action(self, history, _):
         round = len(history)
         return round % self.number_of_actions
