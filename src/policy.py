@@ -17,3 +17,8 @@ class ConstantPolicy(AbstractPolicy):
 
     def choose_action(self, _):
         return self.action
+
+class FixedPolicy(AbstractPolicy):
+    def chose_action(self, history):
+        round = len(history)
+        return round % self.number_of_actions
