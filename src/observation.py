@@ -1,11 +1,15 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Dict
 import pandas as pd
+import matplotlib
+import seaborn as sb
 
 
-@dataclass
-class Context:
-    c: List[float]
+def get_member_as_list(list, member_name):
+    return [getattr(item, member_name) for item in list]
+
+
+Context = Dict[str, float]
 
 
 @dataclass
@@ -14,8 +18,12 @@ class Treatment:
 
 
 @dataclass
-class Outcome:
-    y: List[float]
+class Outcome(Dict):
+    def __init__(self, *args, **kwargs):
+        dict.__init__(self, *args, **kwargs)
+
+    def primary_outcome(self):
+        return self["outcome"]
 
 
 @dataclass
@@ -34,6 +42,16 @@ class History:
 
     def add_outcome(self, outcome):
         self.observations.append(outcome)
+
+    def plot(self, ax) -> matplotlib.axis:
+        primary_outcomes = [
+            observation.outcome.primary_outcome() for observation in self.observations
+        ]
+        treatments = [observation.treatment.i for observation in self.observations]
+        df = pd.DataFrame(
+            data={"primary_outcomes": primary_outcomes, "treatments": treatments}
+        )
+        return sb.barplot(df, x=df.index, y="primary_outcomes", ax=ax, hue="treatments")
 
     # TODO:
     def linear_coefficients(self):

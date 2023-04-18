@@ -1,7 +1,7 @@
 from src.observation import History
 from src.policy import Policy
 from src.treatmentplan import TreatmentPlan
-from src.observation import Observation, Context
+from src.observation import Observation, Context, Outcome, Treatment
 
 from dataclasses import dataclass, field
 from typing import List
@@ -25,21 +25,21 @@ class Model:
         self.rng = default_rng()
 
     def generate_context(self):
-        return Context(c=[self.rng.standard_normal() * self.c_sigma])
+        return {"c": self.rng.standard_normal() * self.c_sigma}
 
     def observe_outcome(self, action, context) -> Observation:
         epsilon = self.rng.standard_normal() * self.epsilon_i_sigma
         y = (
             self.mu_p
             + epsilon
-            + ((action == 1) * (self.mu_T[0] + self.alpha[0] * context.c[0]))
-            + ((action == 2) * (self.mu_T[1] + self.alpha[1] * context.c[0]))
+            + ((action == 1) * (self.mu_T[0] + self.alpha[0] * context["c"]))
+            + ((action == 2) * (self.mu_T[1] + self.alpha[1] * context["c"]))
         )
         return Observation(
             **{
                 "context": context,
-                "treatment": action,
-                "outcome": y,
+                "treatment": Treatment(i=action),
+                "outcome": Outcome({"outcome": y}),
             }
         )
 
