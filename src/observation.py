@@ -51,7 +51,9 @@ class History:
         df = pd.DataFrame(
             data={"primary_outcomes": primary_outcomes, "treatments": treatments}
         )
-        return sb.barplot(df, x=df.index, y="primary_outcomes", ax=ax, hue="treatments")
+        return sb.scatterplot(
+            df, x=df.index, y="primary_outcomes", ax=ax, hue="treatments"
+        )
 
     # TODO:
     def linear_coefficients(self):

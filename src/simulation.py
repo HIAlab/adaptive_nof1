@@ -9,6 +9,11 @@ from typing import List
 import numpy
 from numpy.random import default_rng
 
+from sinot.simulation import Simulation as SinotSimulation
+import pandas as pd
+
+import json
+
 
 @dataclass
 class Model:
@@ -78,6 +83,44 @@ class Model:
             "alpha": self.alpha,
             "epsilon_i_sigma": epsilon_i_sigma,
         }
+
+
+@dataclass
+class SinotModel:
+    parameter_file_path: str
+    sinotSimulation: SinotSimulation = field(init=False)
+    pat_complete: pd.DataFrame = field(init=False)
+    days_per_period: int = 1
+
+    def __post_init__(self):
+        # Load example params
+        with open(self.parameter_file_path) as fp:
+            study_params = json.load(fp)
+
+        self.sinotSimulation = SinotSimulation(study_params)
+        self.pat_complete = SinotSimulation.empty_dataframe()
+        self.days_per_period = 1
+
+    def generate_context(self):
+        return {}
+
+    def observe_outcome(self, action, context) -> Observation:
+        action_to_treatment = {1: "Treatment_1", 2: "Treatment_2"}
+        first_day = None if len(self.pat_complete) > 0 else "2018-01-01"
+        self.pat_complete = self.sinotSimulation.step_patient(
+            action_to_treatment[action],
+            self.days_per_period,
+            data=self.pat_complete,
+            first_day=first_day,
+        )
+        last_row = self.pat_complete.iloc[-1]
+        return Observation(
+            **{
+                "context": {},
+                "treatment": Treatment(i=action),
+                "outcome": Outcome({"outcome": last_row["Uncertain_Low_Back_Pain"]}),
+            }
+        )
 
 
 @dataclass
