@@ -16,6 +16,9 @@ Context = Dict[str, float]
 class Treatment:
     i: int
 
+    def __dict__(self):
+        return {"treatment": self.i}
+
 
 @dataclass
 class Outcome(Dict):
@@ -55,6 +58,13 @@ class History:
             df, x=df.index, y="primary_outcomes", ax=ax, hue="treatments"
         )
 
-    # TODO:
-    def linear_coefficients(self):
-        treatments = [observation.treatment for observation in observations]
+    def to_df(self):
+        dict_list = [
+            {
+                **observation.context,
+                **observation.treatment.__dict__(),
+                **observation.outcome,
+            }
+            for observation in self.observations
+        ]
+        return pd.DataFrame(dict_list)

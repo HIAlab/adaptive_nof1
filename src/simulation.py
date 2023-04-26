@@ -6,6 +6,9 @@ from src.observation import Observation, Context, Outcome, Treatment
 from dataclasses import dataclass, field
 from typing import List
 
+import matplotlib.pyplot as plt
+import matplotlib
+
 import numpy
 from numpy.random import default_rng
 
@@ -101,8 +104,14 @@ class SinotModel:
         self.pat_complete = SinotSimulation.empty_dataframe()
         self.days_per_period = 1
 
+    def __str__(self):
+        return f"SinotModel"
+
     def generate_context(self):
         return {}
+
+    def best_treatment(self):
+        return 2
 
     def observe_outcome(self, action, context) -> Observation:
         action_to_treatment = {1: "Treatment_1", 2: "Treatment_2"}
@@ -128,6 +137,14 @@ class Simulation:
     history: History
     policy: Policy
     model: Model
+
+    def plot(self):
+        axes = plt.axes()
+        self.history.plot(axes)
+        plt.title(str(self.policy) + str(self.model))
+
+    def __str__(self):
+        return f"Simulation\n{self.policy}{self.model}\n"
 
     def step(self):
         context = self.model.generate_context()
