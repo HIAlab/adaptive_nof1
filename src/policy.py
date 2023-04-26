@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import random
 
 
 class Policy(ABC):
@@ -59,3 +60,26 @@ class FrequentistExploreThenCommit(Policy):
             self.best_treatment = self.choose_best_action(history)
             return self.best_treatment
         return self.fixed_policy.choose_action(history, _)
+
+
+class FrequentistEpsilonGreedy(Policy):
+    def __init__(self, number_of_actions: int, epsilon: float):
+        self.epsilon = epsilon
+        super().__init__(number_of_actions)
+
+    def __str__(self):
+        return f"FrequentistEpsilonGreedy: {self.epsilon} epsilon"
+
+    def choose_best_action(self, history):
+        outcome_groupby = history.to_df().groupby("treatment")["outcome"].mean()
+        best_row = outcome_groupby.idxmin()
+        return best_row
+
+    def choose_action(self, history, _):
+        if len(history) < self.number_of_actions:
+            return len(history) + 1
+
+        if random.random() < self.epsilon:
+            return random.choice(range(self.number_of_actions)) + 1
+
+        return self.choose_best_action(history)
