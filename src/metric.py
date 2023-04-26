@@ -4,6 +4,8 @@ from abc import ABC, abstractmethod
 import pandas as pd
 import matplotlib.pyplot as plt
 
+from sklearn.preprocessing import minmax_scale
+
 
 class Metric(ABC):
     @abstractmethod
@@ -20,17 +22,20 @@ class Metric(ABC):
 
 def plot_score(simulations: list[Simulation], metrics):
     sb.barplot(
-        data=score_df(simulations, metrics), x="Score", y="Simulation", hue="Metric"
+        data=score_df(simulations, metrics, minmax_normalization=True), x="Score", y="Simulation", hue="Metric"
     )
 
 
-def score_df(simulations: list[Simulation], metrics):
+def score_df(simulations: list[Simulation], metrics, minmax_normalization=False):
     scores = {str(metric): metric.score_simulations(simulations) for metric in metrics}
+    df = pd.DataFrame(scores)
+    df["Simulation"] = [str(simulation) for simulation in simulations]
+    if minmax_normalization:
+        for metric in metrics:
+            df[str(metric)] = minmax_scale(df[str(metric)])
     return pd.melt(
-        pd.DataFrame(
-            scores, index=[str(simulation) for simulation in simulations]
-        ).reset_index(names=["Simulation"]),
-        id_vars="Simulation",
+        df,
+        id_vars=["Simulation"],
         var_name="Metric",
         value_name="Score",
     )

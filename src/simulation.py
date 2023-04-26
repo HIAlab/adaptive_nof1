@@ -2,6 +2,7 @@ from src.observation import History
 from src.policy import Policy
 from src.treatmentplan import TreatmentPlan
 from src.observation import Observation, Context, Outcome, Treatment
+from src.metric import plot_score, score_df
 
 from dataclasses import dataclass, field
 from typing import List
@@ -14,6 +15,8 @@ from numpy.random import default_rng
 
 from sinot.simulation import Simulation as SinotSimulation
 import pandas as pd
+
+
 
 import json
 
@@ -137,6 +140,23 @@ class Simulation:
     history: History
     policy: Policy
     model: Model
+
+    @staticmethod
+    def from_model_and_policy(model: Model, policy: Policy):
+        return Simulation(history=History(observations=[]), model=model, policy=policy)
+
+    @staticmethod
+    def simulation_study(models, policies, metrics, iterations):
+        assert len(models) == len(policies)
+        simulations = [
+            Simulation.from_model_and_policy(model, policy)
+            for [model, policy] in zip(models, policies)
+        ]
+        for _ in range(iterations):
+            for simulation in simulations:
+                simulation.step()
+        plot_score(simulations, metrics)
+        return score_df(simulations, metrics, minmax_normalization=True)
 
     def plot(self):
         axes = plt.axes()
