@@ -1,8 +1,14 @@
-from src.simulation import Simulation
+from __future__ import annotations
 import seaborn as sb
 from abc import ABC, abstractmethod
 import pandas as pd
 import matplotlib.pyplot as plt
+
+from typing import TYPE_CHECKING
+
+
+if TYPE_CHECKING:
+    from src.simulation import Simulation
 
 from sklearn.preprocessing import minmax_scale
 
@@ -20,9 +26,12 @@ class Metric(ABC):
         pass
 
 
-def plot_score(simulations: list[Simulation], metrics):
+def plot_score(simulations: list[Simulation], metrics, minmax_normalization=False):
     sb.barplot(
-        data=score_df(simulations, metrics, minmax_normalization=True), x="Score", y="Simulation", hue="Metric"
+        data=score_df(simulations, metrics, minmax_normalization=minmax_normalization),
+        x="Score",
+        y="Simulation",
+        hue="Metric",
     )
 
 

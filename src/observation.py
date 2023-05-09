@@ -59,6 +59,8 @@ class History:
         )
 
     def to_df(self):
+        if len(self.observations) == 0:
+            return pd.DataFrame(columns=["treatment", "outcome"])
         dict_list = [
             {
                 **observation.context,

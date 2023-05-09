@@ -2,7 +2,6 @@ from src.observation import History
 from src.policy import Policy
 from src.treatmentplan import TreatmentPlan
 from src.observation import Observation, Context, Outcome, Treatment
-from src.metric import plot_score, score_df
 
 from dataclasses import dataclass, field
 from typing import List
@@ -16,9 +15,13 @@ from numpy.random import default_rng
 from sinot.simulation import Simulation as SinotSimulation
 import pandas as pd
 
+from src.metric import plot_score, score_df
+from tqdm.auto import tqdm as progressbar
 
 
 import json
+
+import logging
 
 
 @dataclass
@@ -130,7 +133,7 @@ class SinotModel:
             **{
                 "context": {},
                 "treatment": Treatment(i=action),
-                "outcome": Outcome({"outcome": last_row["Uncertain_Low_Back_Pain"]}),
+                "outcome": Outcome({"outcome": -last_row["Uncertain_Low_Back_Pain"]}),
             }
         )
 
@@ -152,11 +155,11 @@ class Simulation:
             Simulation.from_model_and_policy(model, policy)
             for [model, policy] in zip(models, policies)
         ]
-        for _ in range(iterations):
-            for simulation in simulations:
+        for _ in progressbar(range(iterations), desc="Step"):
+            for simulation in progressbar(simulations, desc="Simulation", leave=False):
                 simulation.step()
-        plot_score(simulations, metrics)
-        return score_df(simulations, metrics, minmax_normalization=True)
+        plot_score(simulations, metrics, minmax_normalization=False)
+        return score_df(simulations, metrics, minmax_normalization=False), simulations
 
     def plot(self):
         axes = plt.axes()
