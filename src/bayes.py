@@ -24,20 +24,28 @@ class BayesianInference:
 
             baseline = 0
 
-            random_noise_variance = pymc.HalfNormal("random_noise_variance", sigma=10)
+            random_noise_variance = pymc.HalfNormal("random_noise_variance", sigma=100)
             average_treatment_effect = pymc.Normal(
                 "average_treatment_effect", mu=0, sigma=100, shape=number_of_treatments
             )
 
             mu = baseline
             for treatment in treatment_dummies.columns:
-                treatment_index = treatment - 1
                 mu += (
                     np.array(treatment_dummies[treatment])
-                    * average_treatment_effect[treatment_index]
+                    * average_treatment_effect[treatment - 1]
                 )
 
             outcome = pymc.Normal(
                 "outcome", mu=mu, observed=df["outcome"], sigma=random_noise_variance
             )
-            self.trace = pymc.sample(4000, progressbar=False)
+            self.trace = pymc.sample(2000, progressbar=False)
+
+    def approximate_max_probabilities(self):
+        max_indices = np.ravel(
+            self.trace["posterior"]["average_treatment_effect"].argmax(
+                dim="average_treatment_effect_dim_0"
+            )
+        )
+        bin_counts = np.bincount(max_indices)
+        return bin_counts / np.sum(bin_counts)

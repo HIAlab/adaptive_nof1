@@ -1,6 +1,6 @@
 from src.simulation import Model, Simulation, SinotModel
 from src.observation import History
-from src.policy import FixedPolicy
+from src.policy import BlockPolicy, FixedPolicy
 
 
 def load_basic_simulation():
@@ -16,14 +16,15 @@ def load_basic_simulation():
                     "c_sigma": 2,  # "Activity"
                 }
             ),
-            "policy": FixedPolicy(number_of_actions=2, block_length=5),
+            "policy": BlockPolicy(FixedPolicy(number_of_actions=2), block_length=5),
         }
     )
     return simulation
 
 
 def load_sinot_simulation(
-    file_path="", policy=FixedPolicy(number_of_actions=2, block_length=10)
+    file_path="",
+    policy=BlockPolicy(FixedPolicy(number_of_actions=2), block_length=10),
 ):
     simulation = Simulation(
         **{

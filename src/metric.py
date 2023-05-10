@@ -35,6 +35,18 @@ def plot_score(simulations: list[Simulation], metrics, minmax_normalization=Fals
     )
 
 
+def score_df_iterative(
+    simulations: list[Simulation], metrics, range, minmax_normalization=False
+):
+    iterative_metrics = pd.DataFrame()
+    for end in range:
+        sliced_simulations = [simulation[0:end] for simulation in simulations]
+        sliced_metrics = score_df(sliced_simulations, metrics, minmax_normalization)
+        sliced_metrics["t"] = end
+        iterative_metrics = pd.concat([iterative_metrics, sliced_metrics])
+    return iterative_metrics
+
+
 def score_df(simulations: list[Simulation], metrics, minmax_normalization=False):
     scores = {str(metric): metric.score_simulations(simulations) for metric in metrics}
     df = pd.DataFrame(scores)

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import List, Dict
 import pandas as pd
@@ -70,3 +72,14 @@ class History:
             for observation in self.observations
         ]
         return pd.DataFrame(dict_list)
+
+    def __getitem__(self, index) -> History:
+        if isinstance(index, slice):
+            return History(
+                observations=[
+                    self.observations[i]
+                    for i in range(*index.indices(len(self.observations)))
+                ]
+            )
+        else:
+            return History(observations=[self.observations[index]])

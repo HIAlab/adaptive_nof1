@@ -1,11 +1,15 @@
+from pandas.core.frame import dataclasses_to_dicts
 from src.observation import History
-from src.policy import Policy
+from src.policy import Policy, BlockPolicy
 from src.treatmentplan import TreatmentPlan
 from src.observation import Observation, Context, Outcome, Treatment
 
 from dataclasses import dataclass, field
-from typing import List
+import dataclasses
+from typing import List, Callable
 
+import hvplot.pandas
+import panel
 import matplotlib.pyplot as plt
 import matplotlib
 
@@ -15,13 +19,15 @@ from numpy.random import default_rng
 from sinot.simulation import Simulation as SinotSimulation
 import pandas as pd
 
-from src.metric import plot_score, score_df
+from src.metric import plot_score, score_df, score_df_iterative
 from tqdm.auto import tqdm as progressbar
+import seaborn as sns
 
 
 import json
 
 import logging
+import copy
 
 
 @dataclass
@@ -145,21 +151,16 @@ class Simulation:
     model: Model
 
     @staticmethod
-    def from_model_and_policy(model: Model, policy: Policy):
-        return Simulation(history=History(observations=[]), model=model, policy=policy)
+    def from_model_and_policy_with_copy(model: Model, policy: Policy):
+        return Simulation(
+            history=History(observations=[]),
+            model=copy.deepcopy(model),
+            policy=copy.deepcopy(policy),
+        )
 
     @staticmethod
-    def simulation_study(models, policies, metrics, iterations):
-        assert len(models) == len(policies)
-        simulations = [
-            Simulation.from_model_and_policy(model, policy)
-            for [model, policy] in zip(models, policies)
-        ]
-        for _ in progressbar(range(iterations), desc="Step"):
-            for simulation in progressbar(simulations, desc="Simulation", leave=False):
-                simulation.step()
-        plot_score(simulations, metrics, minmax_normalization=False)
-        return score_df(simulations, metrics, minmax_normalization=False), simulations
+    def from_model_and_policy(model: Model, policy: Policy):
+        return Simulation(history=History(observations=[]), model=model, policy=policy)
 
     def plot(self):
         axes = plt.axes()
@@ -174,3 +175,70 @@ class Simulation:
         action = self.policy.choose_action(self.history, context)
         outcome = self.model.observe_outcome(action, context)
         self.history.add_outcome(outcome)
+
+    def __getitem__(self, index):
+        return dataclasses.replace(self, history=self.history[index])
+
+
+@dataclass
+class SeriesOfSimulations:
+    simulations: List[Simulation]
+
+    def __init__(
+        self,
+        model_from_patient_id: Callable[[int], Model],
+        n_patients: int,
+        policy,
+        block_length=20,
+        length=100,
+    ):
+        self.simulations = [
+            Simulation.from_model_and_policy_with_copy(
+                model_from_patient_id(index),
+                BlockPolicy(policy, block_length=block_length),
+            )
+            for index in range(n_patients)
+        ]
+        for _ in progressbar(range(length), desc="Step"):
+            for simulation in progressbar(
+                self.simulations, desc="Simulation", leave=False
+            ):
+                simulation.step()
+        self.n_patients = n_patients
+        self.block_length = block_length
+
+    def plot_line(self, metric):
+        df = score_df_iterative(self.simulations, [metric], range(1, 100))
+        ax = sns.lineplot(data=df, x="t", y="Score", hue="Simulation")
+        sns.move_legend(ax, "upper left", bbox_to_anchor=(1, 1))
+        return df
+
+    def plot_allocations(self):
+        data = []
+        for patient_id in range(self.n_patients):
+            patient_history = self.simulations[patient_id].history
+            for block in range(100 // 20):
+                index = block * self.block_length
+                observation = patient_history.observations[index]
+                data.append(
+                    {
+                        "patient_id": patient_id,
+                        "block": block,
+                        "treatment": observation.treatment.i,
+                        "debug_info": self.simulations[
+                            patient_id
+                        ].policy.internal_policy.debug_information[block],
+                    }
+                )
+        df = pd.DataFrame(data)
+        return panel.panel(
+            df.hvplot.heatmap(
+                x="block",
+                y="patient_id",
+                C="treatment",
+                hover_cols=["debug_info"],
+                cmap="Category10",
+                clim=(0, 10),
+                grid=True,
+            )
+        )
