@@ -12,22 +12,20 @@ def simple_trace():
     chain_two_data = [[2, 1] for _ in range(100)]
     data = [chain_one_data, chain_two_data]
     return {
-        "posterior": {
-            "average_treatment_effect": xr.Dataset(
-                data_vars=dict(
-                    average_treatment_effect=(
-                        ["chain", "draw", "average_treatment_effect_dim_0"],
-                        data,
-                    ),
+        "posterior": xr.Dataset(
+            data_vars=dict(
+                average_treatment_effect=(
+                    ["chain", "draw", "average_treatment_effect_dim_0"],
+                    data,
                 ),
-                coords=dict(
-                    chain=range(2),
-                    draw=range(100),
-                    average_treatment_effect_dim_0=range(2),
-                ),
-                attrs=dict(description="Simple Trace Mockup"),
-            )
-        }
+            ),
+            coords=dict(
+                chain=range(2),
+                draw=range(100),
+                average_treatment_effect_dim_0=range(2),
+            ),
+            attrs=dict(description="Simple Trace Mockup"),
+        )
     }
 
 

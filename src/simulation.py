@@ -105,6 +105,7 @@ class SinotModel:
     parameter_file_path: str
     sinotSimulation: SinotSimulation = field(init=False)
     pat_complete: pd.DataFrame = field(init=False)
+    patient_id: int
     days_per_period: int = 1
 
     def __post_init__(self):
@@ -112,12 +113,14 @@ class SinotModel:
         with open(self.parameter_file_path) as fp:
             study_params = json.load(fp)
 
-        self.sinotSimulation = SinotSimulation(study_params)
+        self.sinotSimulation = SinotSimulation(
+            study_params, random_generator=numpy.random.default_rng(self.patient_id)
+        )
         self.pat_complete = SinotSimulation.empty_dataframe()
         self.days_per_period = 1
 
     def __str__(self):
-        return f"SinotModel"
+        return f"SinotModel(id:{self.patient_id})"
 
     def generate_context(self):
         return {}
@@ -137,9 +140,9 @@ class SinotModel:
         last_row = self.pat_complete.iloc[-1]
         return Observation(
             **{
-                "context": {},
+                "context": context,
                 "treatment": Treatment(i=action),
-                "outcome": Outcome({"outcome": -last_row["Uncertain_Low_Back_Pain"]}),
+                "outcome": Outcome(**{"outcome": -last_row["Uncertain_Low_Back_Pain"]}),
             }
         )
 

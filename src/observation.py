@@ -23,12 +23,8 @@ class Treatment:
 
 
 @dataclass
-class Outcome(Dict):
-    def __init__(self, *args, **kwargs):
-        dict.__init__(self, *args, **kwargs)
-
-    def primary_outcome(self):
-        return self["outcome"]
+class Outcome:
+    outcome: float
 
 
 @dataclass
@@ -50,7 +46,7 @@ class History:
 
     def plot(self, ax) -> matplotlib.axis:
         primary_outcomes = [
-            observation.outcome.primary_outcome() for observation in self.observations
+            observation.outcome.primary_outcome for observation in self.observations
         ]
         treatments = [observation.treatment.i for observation in self.observations]
         df = pd.DataFrame(
@@ -67,7 +63,7 @@ class History:
             {
                 **observation.context,
                 **observation.treatment.__dict__(),
-                **observation.outcome,
+                **observation.outcome.__dict__,
             }
             for observation in self.observations
         ]
