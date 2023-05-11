@@ -1,10 +1,10 @@
 from __future__ import annotations
 
+import matplotlib
+import pandas as pd
+import seaborn as sb
 from dataclasses import dataclass
 from typing import List, Dict
-import pandas as pd
-import matplotlib
-import seaborn as sb
 
 
 def get_member_as_list(list, member_name):

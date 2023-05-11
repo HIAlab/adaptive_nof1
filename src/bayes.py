@@ -1,9 +1,8 @@
-import pymc
+import arviz as az
+import logging
 import numpy as np
 import pandas as pd
-import arviz as az
-
-import logging
+import pymc
 
 
 class BayesianInference:

@@ -1,11 +1,10 @@
 from __future__ import annotations
+
+import matplotlib.pyplot as plt
+import pandas as pd
 import seaborn as sb
 from abc import ABC, abstractmethod
-import pandas as pd
-import matplotlib.pyplot as plt
-
 from typing import TYPE_CHECKING
-
 
 if TYPE_CHECKING:
     from src.simulation import Simulation

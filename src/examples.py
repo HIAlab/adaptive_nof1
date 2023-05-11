@@ -1,6 +1,6 @@
-from src.simulation import Model, Simulation, SinotModel
 from src.observation import History
 from src.policy import BlockPolicy, FixedPolicy
+from src.simulation import Model, Simulation, SinotModel
 
 
 def load_basic_simulation():

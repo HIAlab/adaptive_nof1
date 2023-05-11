@@ -1,33 +1,26 @@
-from pandas.core.frame import dataclasses_to_dicts
-from src.observation import History
-from src.policy import Policy, BlockPolicy
-from src.treatmentplan import TreatmentPlan
-from src.observation import Observation, Context, Outcome, Treatment
-
-from dataclasses import dataclass, field
+import copy
 import dataclasses
+import hvplot.pandas
+import json
+import logging
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy
+import pandas as pd
+import panel
+import seaborn as sns
+from dataclasses import dataclass, field
+from numpy.random import default_rng
+from pandas.core.frame import dataclasses_to_dicts
+from tqdm.auto import tqdm as progressbar
 from typing import List, Callable
 
-import hvplot.pandas
-import panel
-import matplotlib.pyplot as plt
-import matplotlib
-
-import numpy
-from numpy.random import default_rng
-
 from sinot.simulation import Simulation as SinotSimulation
-import pandas as pd
-
 from src.metric import plot_score, score_df, score_df_iterative
-from tqdm.auto import tqdm as progressbar
-import seaborn as sns
-
-
-import json
-
-import logging
-import copy
+from src.observation import History
+from src.observation import Observation, Context, Outcome, Treatment
+from src.policy import Policy, BlockPolicy
+from src.treatmentplan import TreatmentPlan
 
 
 @dataclass
