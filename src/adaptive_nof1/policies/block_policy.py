@@ -1,4 +1,4 @@
-from src.adaptive_nof1.policies.policy import Policy
+from adaptive_nof1.policies.policy import Policy
 
 
 class BlockPolicy(Policy):

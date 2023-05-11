@@ -1,5 +1,5 @@
-from src.adaptive_nof1.basic_types import Observation, Treatment, Outcome
-from src.adaptive_nof1.models.model import Model
+from adaptive_nof1.basic_types import Observation, Treatment, Outcome
+from adaptive_nof1.models.model import Model
 
 
 @dataclass

@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-import matplotlib.pyplot as plt
-import pandas as pd
-import seaborn as sb
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
+import pandas as pd
+import seaborn as sb
+
 if TYPE_CHECKING:
-    from src.adaptive_nof1.simulation import Simulation
+    from adaptive_nof1.simulation import Simulation
 
 from sklearn.preprocessing import minmax_scale
 

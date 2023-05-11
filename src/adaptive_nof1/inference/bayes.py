@@ -1,10 +1,11 @@
-import arviz as az
 import logging
+
+import arviz as az
 import numpy as np
 import pandas as pd
 import pymc
 
-import src.adaptive_nof1.models.model
+import adaptive_nof1.models.model
 
 
 class GaussianAverageTreatmentEffect:
@@ -17,7 +18,7 @@ class GaussianAverageTreatmentEffect:
         # Simple model with baseline + treatment effects + noise
         df = history.to_df()
 
-        model = src.adaptive_nof1.models.model.Model()
+        model = adaptive_nof1.models.model.Model()
         with model:
             logger = logging.getLogger("pymc")
             logger.disabled = False

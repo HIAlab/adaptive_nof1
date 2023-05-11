@@ -1,4 +1,7 @@
-from src.adaptive_nof1.basic_types import Observation
+from abc import ABC, abstractmethod
+from typing import Dict
+
+from adaptive_nof1.basic_types import Observation
 
 
 class Model(ABC):

@@ -1,13 +1,8 @@
 from _pytest.fixtures import FixtureFunction, fixture
-from src.adaptive_nof1.inference import GaussianAverageTreatmentEffect
-import pytest
-from src.adaptive_nof1.models import SinotModel
-
-import pandas as pd
-import numpy as np
-import xarray as xr
 
 import itertools
+
+from adaptive_nof1.models.sinot_model import SinotModel
 
 
 @fixture

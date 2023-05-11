@@ -1,9 +1,4 @@
-import numpy as np
-import random
 from abc import ABC, abstractmethod
-
-from src.adaptive_nof1.inference.bayes import *
-from src.adaptive_nof1.policies.fixed_policy import FixedPolicy
 
 
 class Policy(ABC):

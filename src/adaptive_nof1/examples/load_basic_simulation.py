@@ -1,8 +1,8 @@
-from src.adaptive_nof1.basic_types import History
-from src.adaptive_nof1.models.model import Model
-from src.adaptive_nof1.policies.block_policy import BlockPolicy
-from src.adaptive_nof1.policies.fixed_policy import FixedPolicy
-from src.adaptive_nof1.simulation import Simulation
+from adaptive_nof1.basic_types import History
+from adaptive_nof1.models.model import Model
+from adaptive_nof1.policies.block_policy import BlockPolicy
+from adaptive_nof1.policies.fixed_policy import FixedPolicy
+from adaptive_nof1.simulation import Simulation
 
 
 def load_basic_simulation():

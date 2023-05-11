@@ -1,7 +1,7 @@
-from src.adaptive_nof1.metrics.metric import score_df_iterative
-from src.adaptive_nof1.models.model import Model
-from src.adaptive_nof1.policies.block_policy import BlockPolicy
-from src.adaptive_nof1.simulation import Simulation
+from adaptive_nof1.metrics.metric import score_df_iterative
+from adaptive_nof1.models.model import Model
+from adaptive_nof1.policies.block_policy import BlockPolicy
+from adaptive_nof1.simulation import Simulation
 
 
 @dataclass

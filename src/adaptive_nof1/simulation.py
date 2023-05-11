@@ -1,28 +1,12 @@
 import copy
 import dataclasses
-import hvplot.pandas
-import json
-import logging
-import matplotlib
-import matplotlib.pyplot as plt
-import numpy
-import pandas as pd
-import panel
-import seaborn as sns
-from src.adaptive_nof1 import TreatmentPlan
-from dataclasses import dataclass, field
-from numpy.random import default_rng
-from pandas.core.frame import dataclasses_to_dicts
-from tqdm.auto import tqdm as progressbar
-from typing import List, Callable, Dict
+from dataclasses import dataclass
 
-from src.adaptive_nof1.basic_types import History
-from src.adaptive_nof1.basic_types import Observation, Context, Outcome, Treatment
-from src.adaptive_nof1.metrics.metric import plot_score, score_df, score_df_iterative
-from src.adaptive_nof1.models.model import Model
-from src.adaptive_nof1.policies.block_policy import BlockPolicy
-from src.adaptive_nof1.policies.policy import Policy
-from sinot.simulation import Simulation as SinotSimulation
+import matplotlib.pyplot as plt
+
+from adaptive_nof1.basic_types import History
+from adaptive_nof1.models.model import Model
+from adaptive_nof1.policies.policy import Policy
 
 
 @dataclass
