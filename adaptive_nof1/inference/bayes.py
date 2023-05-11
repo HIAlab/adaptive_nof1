@@ -5,7 +5,7 @@ import pandas as pd
 import pymc
 
 
-class BayesianInference:
+class GaussianAverageTreatmentEffect:
     def get_upper_confidence_bounds(self, variable_name, epsilon: float = 0.05):
         return az.hdi(
             self.trace.posterior, var_names=[variable_name], hdi_prob=1 - epsilon

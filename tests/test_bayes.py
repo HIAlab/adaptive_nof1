@@ -1,4 +1,4 @@
-from src.bayes import BayesianInference
+from adaptive_nof1.inference.bayes import GaussianAverageTreatmentEffect
 import pytest
 
 import pandas as pd
@@ -30,7 +30,7 @@ def simple_trace():
 
 
 def test_approximate_max_probabilities(simple_trace):
-    inference = BayesianInference()
+    inference = GaussianAverageTreatmentEffect()
     inference.trace = simple_trace
 
     assert list(inference.approximate_max_probabilities()) == [0.5, 0.5]

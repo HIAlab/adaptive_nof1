@@ -13,18 +13,30 @@ from dataclasses import dataclass, field
 from numpy.random import default_rng
 from pandas.core.frame import dataclasses_to_dicts
 from tqdm.auto import tqdm as progressbar
-from typing import List, Callable
+from typing import List, Callable, Dict
 
 from sinot.simulation import Simulation as SinotSimulation
-from src.metric import plot_score, score_df, score_df_iterative
-from src.observation import History
-from src.observation import Observation, Context, Outcome, Treatment
-from src.policy import Policy, BlockPolicy
-from src.treatmentplan import TreatmentPlan
+from adaptive_nof1.metrics.metric import plot_score, score_df, score_df_iterative
+from adaptive_nof1.basic_types import History
+from adaptive_nof1.basic_types import Observation, Context, Outcome, Treatment
+from adaptive_nof1.policies.policy import Policy
+from adaptive_nof1.policies.block_policy import BlockPolicy
+from adaptive_nof1.treatmentplan import TreatmentPlan
 
+class Model(ABC):
+    def __init__(self):
+        pass
+
+    @abstractmethod
+    def generate_context(self) -> Dict:
+        pass
+
+    @abstractmethod
+    def observe_outcome(self, action, context) -> Observation:
+        pass
 
 @dataclass
-class Model:
+class SimpleBackPainModel(Model):
     mu_p: float
     epsilon_i_sigma: float
     c_sigma: float
@@ -94,7 +106,7 @@ class Model:
 
 
 @dataclass
-class SinotModel:
+class SinotModel(Model):
     parameter_file_path: str
     sinotSimulation: SinotSimulation = field(init=False)
     pat_complete: pd.DataFrame = field(init=False)

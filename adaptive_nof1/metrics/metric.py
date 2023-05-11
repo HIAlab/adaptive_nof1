@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.simulation import Simulation
+    from adaptive_nof1.simulation import Simulation
 
 from sklearn.preprocessing import minmax_scale
 
@@ -61,21 +61,3 @@ def score_df(simulations: list[Simulation], metrics, minmax_normalization=False)
     )
 
 
-class SimpleRegret(Metric):
-    def score(self, simulation: Simulation) -> float:
-        return simulation.history.to_df()["outcome"].mean()
-
-    def __str__(self) -> str:
-        return "Simple Regret"
-
-
-class FrequentistOptimalSelection(Metric):
-    def score(self, simulation: Simulation) -> float:
-        outcome_groupby = (
-            simulation.history.to_df().groupby("treatment")["outcome"].mean()
-        )
-        best_mean = outcome_groupby.idxmin()
-        return {True: 1.0, False: 0.0}[best_mean == simulation.model.best_treatment()]
-
-    def __str__(self) -> str:
-        return "Optimal Selection"
