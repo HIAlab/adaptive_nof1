@@ -1,6 +1,9 @@
 from adaptive_nof1.basic_types import Observation, Treatment, Outcome
 from adaptive_nof1.models.model import Model
 
+from dataclasses import dataclass, field
+from typing import List
+import numpy
 
 @dataclass
 class SimpleBackPainModel(Model):

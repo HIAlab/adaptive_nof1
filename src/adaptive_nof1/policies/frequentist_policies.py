@@ -1,6 +1,8 @@
 from adaptive_nof1.policies.fixed_policy import FixedPolicy
 from adaptive_nof1.policies.policy import Policy
 
+import random
+
 
 class FrequentistExploreThenCommit(Policy):
     def __init__(self, number_of_actions, explore_blocks=5):

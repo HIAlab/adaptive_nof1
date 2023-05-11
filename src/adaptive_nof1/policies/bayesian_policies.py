@@ -1,6 +1,8 @@
 from adaptive_nof1.inference.bayes import GaussianAverageTreatmentEffect
 from adaptive_nof1.policies.policy import Policy
 
+import random
+
 
 class UpperConfidenceBound(Policy):
     def __init__(self, number_of_actions: int, epsilon: float):
