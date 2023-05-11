@@ -1,4 +1,4 @@
-from adaptive_nof1.inference.bayes import GaussianAverageTreatmentEffect
+from src.adaptive_nof1.inference import GaussianAverageTreatmentEffect
 import pytest
 
 import pandas as pd

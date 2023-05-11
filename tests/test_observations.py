@@ -1,4 +1,4 @@
-from adaptive_nof1.basic_types import History, Observation, Context, Treatment, Outcome
+from src.adaptive_nof1 import History, Observation, Context, Treatment, Outcome
 import pytest
 
 import pandas as pd

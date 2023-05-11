@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from adaptive_nof1.simulation import Simulation
+    from src.adaptive_nof1.simulation import Simulation
 
 from sklearn.preprocessing import minmax_scale
 

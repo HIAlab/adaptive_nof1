@@ -1,5 +1,5 @@
-from adaptive_nof1.inference.bayes import GaussianAverageTreatmentEffect
-from adaptive_nof1.policies.policy import Policy
+from src.adaptive_nof1.inference.bayes import GaussianAverageTreatmentEffect
+from src.adaptive_nof1.policies.policy import Policy
 
 
 class UpperConfidenceBound(Policy):

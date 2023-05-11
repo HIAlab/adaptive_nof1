@@ -1,7 +1,7 @@
 from _pytest.fixtures import FixtureFunction, fixture
-from adaptive_nof1.inference.bayes import GaussianAverageTreatmentEffect
+from src.adaptive_nof1.inference import GaussianAverageTreatmentEffect
 import pytest
-from adaptive_nof1.simulation import SinotModel
+from src.adaptive_nof1.models import SinotModel
 
 import pandas as pd
 import numpy as np

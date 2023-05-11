@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 import pymc
 
+import src.adaptive_nof1.models.model
+
 
 class GaussianAverageTreatmentEffect:
     def get_upper_confidence_bounds(self, variable_name, epsilon: float = 0.05):
@@ -15,7 +17,7 @@ class GaussianAverageTreatmentEffect:
         # Simple model with baseline + treatment effects + noise
         df = history.to_df()
 
-        model = pymc.Model()
+        model = src.adaptive_nof1.models.model.Model()
         with model:
             logger = logging.getLogger("pymc")
             logger.disabled = False

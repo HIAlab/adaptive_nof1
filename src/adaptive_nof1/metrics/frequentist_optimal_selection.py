@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from adaptive_nof1.metrics.metric import Metric
-from adaptive_nof1.simulation import Simulation
+from src.adaptive_nof1.metrics.metric import Metric
+from src.adaptive_nof1.simulation import Simulation
 
 
 class FrequentistOptimalSelection(Metric):

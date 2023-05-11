@@ -1,0 +1,63 @@
+import copy
+import dataclasses
+import hvplot.pandas
+import json
+import logging
+import matplotlib
+import matplotlib.pyplot as plt
+import numpy
+import pandas as pd
+import panel
+import seaborn as sns
+from src.adaptive_nof1 import TreatmentPlan
+from dataclasses import dataclass, field
+from numpy.random import default_rng
+from pandas.core.frame import dataclasses_to_dicts
+from tqdm.auto import tqdm as progressbar
+from typing import List, Callable, Dict
+
+from src.adaptive_nof1.basic_types import History
+from src.adaptive_nof1.basic_types import Observation, Context, Outcome, Treatment
+from src.adaptive_nof1.metrics.metric import plot_score, score_df, score_df_iterative
+from src.adaptive_nof1.models.model import Model
+from src.adaptive_nof1.policies.block_policy import BlockPolicy
+from src.adaptive_nof1.policies.policy import Policy
+from sinot.simulation import Simulation as SinotSimulation
+
+
+@dataclass
+class Simulation:
+    history: History
+    policy: Policy
+    model: Model
+
+    @staticmethod
+    def from_model_and_policy_with_copy(model: Model, policy: Policy):
+        return Simulation(
+            history=History(observations=[]),
+            model=copy.deepcopy(model),
+            policy=copy.deepcopy(policy),
+        )
+
+    @staticmethod
+    def from_model_and_policy(model: Model, policy: Policy):
+        return Simulation(history=History(observations=[]), model=model, policy=policy)
+
+    def plot(self):
+        axes = plt.axes()
+        self.history.plot(axes)
+        plt.title(str(self.policy) + str(self.model))
+
+    def __str__(self):
+        return f"Simulation\n{self.policy}{self.model}\n"
+
+    def step(self):
+        context = self.model.generate_context()
+        action = self.policy.choose_action(self.history, context)
+        outcome = self.model.observe_outcome(action, context)
+        self.history.add_outcome(outcome)
+
+    def __getitem__(self, index):
+        return dataclasses.replace(self, history=self.history[index])
+
+

@@ -1,5 +1,5 @@
-from adaptive_nof1.policies.fixed_policy import FixedPolicy
-from adaptive_nof1.policies.policy import Policy
+from src.adaptive_nof1.policies.fixed_policy import FixedPolicy
+from src.adaptive_nof1.policies.policy import Policy
 
 
 class FrequentistExploreThenCommit(Policy):
