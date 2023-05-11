@@ -7,7 +7,7 @@ from adaptive_nof1.models.sinot_model import SinotModel
 
 @fixture
 def parameter_file_path():
-    return "sinot/example/example_params.json"
+    return "src/sinot/example/example_params.json"
 
 
 @fixture
