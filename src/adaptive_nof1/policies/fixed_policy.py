@@ -10,4 +10,5 @@ class FixedPolicy(Policy):
 
     def choose_action(self, history, _, block_length=1):
         round = len(history) // block_length
+        self.debug_information += ["Fixed Schedule"]
         return round % self.number_of_actions + 1

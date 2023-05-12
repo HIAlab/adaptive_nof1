@@ -16,6 +16,7 @@ class SinotModel(Model):
     pat_complete: pd.DataFrame = field(init=False)
     patient_id: int
     days_per_period: int = 1
+    patient_id_in_str = False
 
     def __post_init__(self):
         # Load example params
@@ -29,7 +30,9 @@ class SinotModel(Model):
         self.days_per_period = 1
 
     def __str__(self):
-        return f"SinotModel(id:{self.patient_id})"
+        if self.patient_id_in_str:
+            return f"SinotModel(id:{self.patient_id})"
+        return f"SinotModel()"
 
     def generate_context(self):
         return {}

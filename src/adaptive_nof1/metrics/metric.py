@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 import pandas as pd
 import seaborn as sb
+import numpy as np
 
 if TYPE_CHECKING:
     from adaptive_nof1.simulation import Simulation
@@ -18,7 +19,8 @@ class Metric(ABC):
         pass
 
     def score_simulations(self, simulations: list[Simulation]):
-        return [self.score(simulation) for simulation in simulations]
+        df =  pd.DataFrame({i: self.score(simulation) for i, simulation in enumerate(simulations)})
+        return pd.melt(df, var_name='simulation', value_name='score', ignore_index=False)
 
     @abstractmethod
     def __str__(self) -> str:
@@ -34,30 +36,17 @@ def plot_score(simulations: list[Simulation], metrics, minmax_normalization=Fals
     )
 
 
-def score_df_iterative(
-    simulations: list[Simulation], metrics, range, minmax_normalization=False
-):
-    iterative_metrics = pd.DataFrame()
-    for end in range:
-        sliced_simulations = [simulation[0:end] for simulation in simulations]
-        sliced_metrics = score_df(sliced_simulations, metrics, minmax_normalization)
-        sliced_metrics["t"] = end
-        iterative_metrics = pd.concat([iterative_metrics, sliced_metrics])
-    return iterative_metrics
-
-
 def score_df(simulations: list[Simulation], metrics, minmax_normalization=False):
+    df_list = []
     scores = {str(metric): metric.score_simulations(simulations) for metric in metrics}
-    df = pd.DataFrame(scores)
-    df["Simulation"] = [str(simulation) for simulation in simulations]
+    for metric_name, metric_df in scores.items():
+        metric_df["metric"] = metric_name
+        df_list.append(metric_df)
+    df = pd.concat(df_list)
+    import pdb; pdb.set_trace()
+    df["Simulation"] = np.repeat([str(simulation) for simulation in simulations], len(simulations[0].history))
     if minmax_normalization:
         for metric in metrics:
             df[str(metric)] = minmax_scale(df[str(metric)])
-    return pd.melt(
-        df,
-        id_vars=["Simulation"],
-        var_name="Metric",
-        value_name="Score",
-    )
-
+    return df
 

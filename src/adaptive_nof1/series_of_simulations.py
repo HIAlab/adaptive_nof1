@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from adaptive_nof1.metrics.metric import score_df_iterative
 from adaptive_nof1.models.model import Model
 from adaptive_nof1.policies.block_policy import BlockPolicy
@@ -45,6 +47,13 @@ class SeriesOfSimulations:
         ax = sns.lineplot(data=df, x="t", y="Score", hue="Simulation")
         sns.move_legend(ax, "upper left", bbox_to_anchor=(1, 1))
         return df
+
+    @staticmethod
+    def plot_lines(listofseries: List[SeriesOfSimulations], metric):
+        dataframes = [score_df_iterative(series.simulations, [metric], range(1, 100)) for series in listofseries]
+        ax = sns.lineplot(data=pd.concat(dataframes), x="t", y="Score", hue="Simulation")
+        sns.move_legend(ax, "upper left", bbox_to_anchor=(1, 1))
+
 
     def plot_allocations(self):
         data = []

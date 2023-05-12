@@ -9,5 +9,5 @@ class ConstantPolicy(Policy):
     def __str__(self):
         return f"ConstantPolicy: {self.action}.\n"
 
-    def choose_action(self):
+    def choose_action(self, *_):
         return self.action
