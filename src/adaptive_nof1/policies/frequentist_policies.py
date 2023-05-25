@@ -14,7 +14,7 @@ class FrequentistExploreThenCommit(Policy):
         super().__init__(number_of_actions)
 
     def __str__(self):
-        return f"FrequentistExploreThenCommit:{self.explore_blocks} explore blocks.\n"
+        return f"FrequentistExploreThenCommit:{self.explore_blocks} explore blocks."
 
     def choose_best_action(self, history):
         outcome_groupby = history.to_df().groupby("treatment")["outcome"].mean()

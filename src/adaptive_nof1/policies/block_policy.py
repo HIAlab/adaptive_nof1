@@ -6,6 +6,7 @@ class BlockPolicy(Policy):
         self.internal_policy = internal_policy
         self.block_length = block_length
         self.last_action = None
+        super().__init__(number_of_actions=internal_policy.number_of_actions)
 
     def __str__(self):
         return f"BlockPolicy({self.internal_policy})"
@@ -18,4 +19,7 @@ class BlockPolicy(Policy):
             self.last_action = self.internal_policy.choose_action(
                 history, context, block_length=self.block_length
             )
+            self._debug_information += [self.internal_policy.debug_information[-1]]
+        else:
+            self._debug_information += ["Repeated Block"]
         return self.last_action

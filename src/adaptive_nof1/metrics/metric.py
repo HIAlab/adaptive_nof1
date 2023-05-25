@@ -19,8 +19,10 @@ class Metric(ABC):
         pass
 
     def score_simulations(self, simulations: list[Simulation]):
-        df =  pd.DataFrame({i: self.score(simulation) for i, simulation in enumerate(simulations)})
-        return pd.melt(df, var_name='simulation', value_name='score', ignore_index=False)
+        df =  pd.DataFrame({index: self.score(simulation) for index, simulation in enumerate(simulations)})
+        melted_df = pd.melt(df, var_name='simulation', value_name='score', ignore_index=False)
+        melted_df["t"] = melted_df.index
+        return melted_df
 
     @abstractmethod
     def __str__(self) -> str:
@@ -43,7 +45,6 @@ def score_df(simulations: list[Simulation], metrics, minmax_normalization=False)
         metric_df["metric"] = metric_name
         df_list.append(metric_df)
     df = pd.concat(df_list)
-    import pdb; pdb.set_trace()
     df["Simulation"] = np.repeat([str(simulation) for simulation in simulations], len(simulations[0].history))
     if minmax_normalization:
         for metric in metrics:

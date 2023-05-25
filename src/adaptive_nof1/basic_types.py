@@ -42,12 +42,12 @@ class History:
     def __len__(self):
         return len(self.observations)
 
-    def add_outcome(self, outcome):
-        self.observations.append(outcome)
+    def add_observation(self, observation):
+        self.observations.append(observation)
 
     def plot(self, ax) -> matplotlib.axis:
         primary_outcomes = [
-            observation.outcome.primary_outcome for observation in self.observations
+            observation.outcome.outcome for observation in self.observations
         ]
         treatments = [observation.treatment.i for observation in self.observations]
         df = pd.DataFrame(

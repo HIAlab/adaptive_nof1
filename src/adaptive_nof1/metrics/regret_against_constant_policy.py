@@ -5,6 +5,7 @@ from adaptive_nof1.simulation import Simulation
 
 from ..policies import ConstantPolicy
 
+import numpy
 
 class RegretAgainstConstantPolicy(Metric):
 
@@ -13,12 +14,12 @@ class RegretAgainstConstantPolicy(Metric):
 
     def score(self, simulation: Simulation):
         # Todo: Test that this is 0 if using same constant policy
-        constant_simulation = Simulation.from_model_and_policy_with_copy(simulation.model, ConstantPolicy(number_of_actions=simulation.policy.internal_policy.number_of_actions, action=self.constant_action))
+        constant_simulation = Simulation.from_model_and_policy_with_copy(simulation.model, ConstantPolicy(number_of_actions=simulation.policy.number_of_actions, action=self.constant_action))
         for _ in range(len(simulation.history)):
             constant_simulation.step()
 
         constant_df = constant_simulation.history.to_df()
-        return simulation.history.to_df()["outcome"] - constant_df["outcome"]
+        return numpy.cumsum(constant_df["outcome"] - simulation.history.to_df()["outcome"])
 
     def __str__(self) -> str:
         return f"RegretAgainstConstantAction()"

@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict
 
-from adaptive_nof1.basic_types import Observation
+from adaptive_nof1.basic_types import Observation, History
 
 
 class Model(ABC):
@@ -9,7 +9,7 @@ class Model(ABC):
         pass
 
     @abstractmethod
-    def generate_context(self) -> Dict:
+    def generate_context(self, history: History) -> Dict:
         pass
 
     @abstractmethod
