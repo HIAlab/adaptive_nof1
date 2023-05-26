@@ -27,6 +27,9 @@ class BayesianModel:
 
 
 class GaussianAverageTreatmentEffect(BayesianModel):
+    def __str__(self):
+        return "GaussianAverageTreatmentEffect"
+
     def update_posterior(self, history, number_of_treatments):
         # Simple model with baseline + treatment effects + noise
         df = history.to_df()
@@ -61,6 +64,9 @@ class FixedVarianceNormalEffect(BayesianModel):
     def __init__(self, effect_variance, random_variance):
         self.effect_variance = effect_variance
         self.random_variance = random_variance
+
+    def __str__(self):
+        return "FixedVarianceNormalEffect"
 
     def update_posterior(self, history, number_of_treatments):
         # Simple model with baseline + treatment effects + noise
@@ -100,6 +106,9 @@ class LinearAdditiveModel(BayesianModel):
         self.number_of_coefficients = number_of_coefficients
         self.effect_variance = effect_variance
         self.random_variance = random_variance
+
+    def __str__(self):
+        return f"LinearAdditiveModel"
 
     def update_posterior(self, history, number_of_treatments):
         df = history.to_df()
