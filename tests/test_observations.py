@@ -1,4 +1,3 @@
-
 import pytest
 
 from adaptive_nof1.basic_types import *

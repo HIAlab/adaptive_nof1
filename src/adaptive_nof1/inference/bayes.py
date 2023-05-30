@@ -102,8 +102,8 @@ class FixedVarianceNormalEffect(BayesianModel):
 
 
 class LinearAdditiveModel(BayesianModel):
-    def __init__(self, number_of_coefficients, effect_variance, random_variance):
-        self.number_of_coefficients = number_of_coefficients
+    def __init__(self, coefficient_names, effect_variance, random_variance):
+        self.coefficient_names = coefficient_names
         self.effect_variance = effect_variance
         self.random_variance = random_variance
 
@@ -131,12 +131,12 @@ class LinearAdditiveModel(BayesianModel):
                 "slopes",
                 mu=0,
                 sigma=self.effect_variance,
-                shape=(number_of_treatments, self.number_of_coefficients),
+                shape=(number_of_treatments, len(self.coefficient_names)),
             )
 
             for treatment in treatment_dummies.columns:
                 local_coefficients = df[
-                    range(self.number_of_coefficients)
+                    self.coefficient_names
                 ].to_numpy()  # n * number_of_coefficien
                 local_slopes = slopes[treatment - 1]  # 1 * number_of_coefficients
 

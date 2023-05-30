@@ -50,5 +50,3 @@ class Simulation:
 
     def __getitem__(self, index):
         return dataclasses.replace(self, history=self.history[index])
-
-

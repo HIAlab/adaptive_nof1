@@ -79,9 +79,51 @@ class ClippedThompsonSampling(Policy):
             self.inference, "trace"
         ):
             self.inference.update_posterior(history, self.number_of_actions)
-        probability_array = numpy.clip(self.inference.approximate_max_probabilities(
-            self.number_of_actions
-        ), 0.1, 0.9)
+        probability_array = numpy.clip(
+            self.inference.approximate_max_probabilities(self.number_of_actions),
+            0.1,
+            0.9,
+        )
+        action = (
+            random.choices(range(self.number_of_actions), weights=probability_array)[0]
+            + 1
+        )
+        self._debug_information += [
+            f"Probabilities for picking: {numpy.array_str(probability_array, precision=2, suppress_small=True)}, chose {action}"
+        ]
+        return action
+
+
+class ClippedHistoryAwareThompsonSampling(Policy):
+    def __init__(
+        self, number_of_actions: int, inference_model, posterior_update_interval=1
+    ):
+        super().__init__(number_of_actions)
+        self.inference = inference_model
+        self.posterior_update_interval = posterior_update_interval
+
+    def __str__(self):
+        return f"ClippedHistoryAwareThompsonSampling({self.inference})"
+
+    def choose_action(self, history, _, block_length=None):
+        if len(history) % self.posterior_update_interval == 0 or not hasattr(
+            self.inference, "trace"
+        ):
+            self.inference.update_posterior(history, self.number_of_actions)
+        probability_array = numpy.clip(
+            self.inference.approximate_max_probabilities(self.number_of_actions),
+            0.1,
+            0.9,
+        )
+        last_three_actions = [
+            observation.treatment.i for observation in history.observations[-3:]
+        ]
+
+        # Penalize using the same action
+        print(last_three_actions)
+        for action in last_three_actions:
+            action_index = action - 1
+            probability_array[action_index] -= 0.2
         action = (
             random.choices(range(self.number_of_actions), weights=probability_array)[0]
             + 1

@@ -1,4 +1,9 @@
-from .bayesian_policies import UpperConfidenceBound, ThompsonSampling, ClippedThompsonSampling
+from .bayesian_policies import (
+    UpperConfidenceBound,
+    ThompsonSampling,
+    ClippedThompsonSampling,
+    ClippedHistoryAwareThompsonSampling,
+)
 from .block_policy import BlockPolicy
 from .constant_policy import ConstantPolicy
 from .fixed_policy import FixedPolicy

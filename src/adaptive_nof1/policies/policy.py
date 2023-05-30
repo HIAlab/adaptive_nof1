@@ -14,5 +14,3 @@ class Policy(ABC):
     @abstractmethod
     def choose_action(self, history, context, block_length=1):
         pass
-
-

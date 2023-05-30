@@ -73,6 +73,7 @@ class SeriesOfSimulations:
                             patient_id
                         ].policy.debug_information[index],
                         "context": str(observation.context),
+                        "outcome": observation.outcome.outcome,
                     }
                 )
         df = pd.DataFrame(data)
@@ -81,7 +82,7 @@ class SeriesOfSimulations:
                 x="index",
                 y="patient_id",
                 C="treatment",
-                hover_cols=["debug_info", "context"],
+                hover_cols=["debug_info", "context", "outcome"],
                 cmap="Category10",
                 clim=(0, 10),
                 grid=True,

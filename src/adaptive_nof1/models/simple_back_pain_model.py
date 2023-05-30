@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from typing import List
 import numpy
 
+
 @dataclass
 class SimpleBackPainModel(Model):
     mu_p: float
