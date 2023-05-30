@@ -33,6 +33,7 @@ class Observation:
     context: Context
     treatment: Treatment
     outcome: Outcome
+    counterfactual_outcomes: List[Outcome]
 
 
 @dataclass
