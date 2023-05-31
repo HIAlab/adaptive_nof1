@@ -31,4 +31,4 @@ jobs:
           pytest
       - name: Test demo notebook
         run: |
-          pytest --nbmake notebooks/demo.ipynb
+          pytest --nbmake notebooks/demo.ipynb --nbmake-kernel=python3
