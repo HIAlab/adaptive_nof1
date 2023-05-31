@@ -5,6 +5,7 @@ description = "Code for adaptive N-of-1 Trials"
 dependencies = [
     'numpy',
     'pandas',
+    'seaborn',
 ]
 
 [project.optional-dependencies]
