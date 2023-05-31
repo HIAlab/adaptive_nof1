@@ -33,4 +33,4 @@ def test_approximate_max_probabilities(simple_trace):
     inference = GaussianAverageTreatmentEffect()
     inference.trace = simple_trace
 
-    assert list(inference.approximate_max_probabilities()) == [0.5, 0.5]
+    assert list(inference.approximate_max_probabilities(number_of_treatments=2)) == [0.5, 0.5]
