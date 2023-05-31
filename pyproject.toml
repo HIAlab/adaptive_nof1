@@ -10,7 +10,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     'pytest',
-    'pytest-nbmake',
+    'nbmake',
     'black',
 ]
 
