@@ -74,6 +74,9 @@ class SeriesOfSimulations:
                         ].policy.debug_information[index],
                         "context": str(observation.context),
                         "outcome": observation.outcome.outcome,
+                        "counterfactual_outcomes": str(
+                            observation.counterfactual_outcomes
+                        ),
                     }
                 )
         df = pd.DataFrame(data)
@@ -82,7 +85,12 @@ class SeriesOfSimulations:
                 x="index",
                 y="patient_id",
                 C="treatment",
-                hover_cols=["debug_info", "context", "outcome"],
+                hover_cols=[
+                    "debug_info",
+                    "context",
+                    "outcome",
+                    "counterfactual_outcomes",
+                ],
                 cmap="Category10",
                 clim=(0, 10),
                 grid=True,

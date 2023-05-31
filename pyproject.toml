@@ -2,6 +2,24 @@
 name = "adaptive_nof1"
 version = "0.0.1"
 description = "Code for adaptive N-of-1 Trials"
+dependencies = [
+    'numpy',
+    'pandas',
+    'seaborn',
+    'scikit-learn',
+    'arviz',
+    'pymc',
+    'tqdm',
+    'panel',
+    'hvplot',
+]
+
+[project.optional-dependencies]
+dev = [
+    'pytest',
+    'nbmake',
+    'black',
+]
 
 [build-system]
 requires = ["setuptools >= 61.0.0"]

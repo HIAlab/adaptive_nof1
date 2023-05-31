@@ -39,11 +39,16 @@ class Simulation:
         context = self.model.generate_context(self.history)
         action = self.policy.choose_action(self.history, context)
         outcome = self.model.observe_outcome(action, context)
+        counterfactual_outcomes = [
+            self.model.observe_outcome(counterfactual_action, context).outcome
+            for counterfactual_action in range(1, self.policy.number_of_actions + 1)
+        ]
         observation = Observation(
             **{
                 "context": context,
                 "treatment": Treatment(i=action),
                 "outcome": outcome,
+                "counterfactual_outcomes": counterfactual_outcomes,
             }
         )
         self.history.add_observation(observation)
