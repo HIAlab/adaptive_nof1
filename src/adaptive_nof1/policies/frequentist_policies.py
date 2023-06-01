@@ -17,7 +17,9 @@ class FrequentistExploreThenCommit(Policy):
         return f"FrequentistExploreThenCommit:{self.explore_blocks} explore blocks."
 
     def choose_best_action(self, history):
-        outcome_groupby = history.to_df().groupby("treatment")[self.outcome_name].mean()
+        outcome_groupby = (
+            history.to_df().groupby(self.treatment_name)[self.outcome_name].mean()
+        )
         best_row = outcome_groupby.idxmax()
         return best_row
 
@@ -42,7 +44,9 @@ class FrequentistEpsilonGreedy(Policy):
         return f"FrequentistEpsilonGreedy: {self.epsilon} epsilon"
 
     def choose_best_action(self, history):
-        outcome_groupby = history.to_df().groupby("treatment")[self.outcome_name].mean()
+        outcome_groupby = (
+            history.to_df().groupby(self.treatment_name)[self.outcome_name].mean()
+        )
         best_row = outcome_groupby.idxmax()
         return best_row
 

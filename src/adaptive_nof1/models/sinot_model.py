@@ -53,7 +53,7 @@ class SinotModel(Model):
         return Observation(
             **{
                 "context": context,
-                "treatment": Treatment(i=action),
+                "treatment": {"treatment": action},
                 "outcome": {"outcome": -last_row["Uncertain_Low_Back_Pain"]},
             }
         )

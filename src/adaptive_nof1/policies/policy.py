@@ -3,9 +3,12 @@ from typing import List
 
 
 class Policy(ABC):
-    def __init__(self, number_of_actions, outcome_name="outcome"):
+    def __init__(
+        self, number_of_actions, outcome_name="outcome", treatment_name="treatment"
+    ):
         self.number_of_actions = number_of_actions
         self.outcome_name = outcome_name
+        self.treatment_name = treatment_name
         self._debug_information = []
 
     @property
@@ -15,3 +18,6 @@ class Policy(ABC):
     @abstractmethod
     def choose_action(self, history, context, block_length=1):
         pass
+
+    def available_actions(self):
+        return range(1, self.number_of_actions + 1)

@@ -15,13 +15,7 @@ def get_member_as_list(list, member_name):
 Context = Dict[str, float]
 
 
-@dataclass
-class Treatment:
-    i: int
-
-    def __dict__(self):
-        return {"treatment": self.i}
-
+Treatment = Dict[str, float]
 
 Outcome = Dict[str, float]
 
@@ -62,7 +56,7 @@ class History:
         dict_list = [
             {
                 **observation.context,
-                **observation.treatment.__dict__(),
+                **observation.treatment,
                 **observation.outcome,
             }
             for observation in self.observations

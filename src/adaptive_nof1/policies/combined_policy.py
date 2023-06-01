@@ -1,3 +1,4 @@
+from adaptive_nof1.dict_helpers import split_with_postfix
 from adaptive_nof1.policies.policy import Policy
 
 import numpy
@@ -24,5 +25,13 @@ class CombinedPolicy(Policy):
         return [info for policy in self.policies for info in policy.debug_information]
 
     def choose_action(self, history, context):
-        actions = [policy.choose_action(history, context) for policy in self.policies]
+        contexts = split_with_postfix(context)
+        actions = {
+            policy.treatment_name: policy.choose_action(history, context)
+            for policy, context in zip(self.policies, contexts)
+        }
         return actions
+
+    def available_actions(self):
+        # Todo Implementation:
+        return []

@@ -58,7 +58,7 @@ class SeriesOfSimulations:
         ax.set(xlabel="t", ylabel="Regret")
         sns.move_legend(ax, "upper left", bbox_to_anchor=(1, 1))
 
-    def plot_allocations(self):
+    def plot_allocations(self, treatment_name="treatment"):
         data = []
         for patient_id in range(self.n_patients):
             patient_history = self.simulations[patient_id].history
@@ -68,7 +68,7 @@ class SeriesOfSimulations:
                     {
                         "patient_id": patient_id,
                         "index": index,
-                        "treatment": observation.treatment.i,
+                        **observation.treatment,
                         "debug_info": self.simulations[
                             patient_id
                         ].policy.debug_information[index],
@@ -84,7 +84,7 @@ class SeriesOfSimulations:
             df.hvplot.heatmap(
                 x="index",
                 y="patient_id",
-                C="treatment",
+                C=treatment_name,
                 hover_cols=[
                     "debug_info",
                     "context",
