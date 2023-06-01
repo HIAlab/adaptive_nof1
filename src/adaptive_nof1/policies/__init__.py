@@ -10,3 +10,4 @@ from .fixed_policy import FixedPolicy
 from .frequentist_policies import FrequentistEpsilonGreedy, FrequentistExploreThenCommit
 from .policy import Policy
 from .composed_policy import ComposedPolicy
+from .combined_policy import CombinedPolicy
