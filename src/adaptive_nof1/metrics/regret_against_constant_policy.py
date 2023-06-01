@@ -26,7 +26,8 @@ class RegretAgainstConstantPolicy(Metric):
 
         constant_df = constant_simulation.history.to_df()
         return numpy.cumsum(
-            constant_df["outcome"] - simulation.history.to_df()["outcome"]
+            constant_df[self.outcome_name]
+            - simulation.history.to_df()[self.outcome_name]
         )
 
     def __str__(self) -> str:

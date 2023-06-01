@@ -23,9 +23,7 @@ class Treatment:
         return {"treatment": self.i}
 
 
-@dataclass
-class Outcome:
-    outcome: float
+Outcome = Dict[str, float]
 
 
 @dataclass
@@ -65,7 +63,7 @@ class History:
             {
                 **observation.context,
                 **observation.treatment.__dict__(),
-                **observation.outcome.__dict__,
+                **observation.outcome,
             }
             for observation in self.observations
         ]

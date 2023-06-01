@@ -3,8 +3,9 @@ from typing import List
 
 
 class Policy(ABC):
-    def __init__(self, number_of_actions):
+    def __init__(self, number_of_actions, outcome_name="outcome"):
         self.number_of_actions = number_of_actions
+        self.outcome_name = outcome_name
         self._debug_information = []
 
     @property

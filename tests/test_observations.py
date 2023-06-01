@@ -10,17 +10,17 @@ def simple_history():
             Observation(
                 context={"activity": 10},
                 treatment=Treatment(**{"i": 0}),
-                outcome=Outcome(**{"outcome": 2}),
+                outcome={"outcome": 2},
             ),
             Observation(
                 context={"activity": 20},
                 treatment=Treatment(**{"i": 1}),
-                outcome=Outcome(**{"outcome": 3}),
+                outcome={"outcome": 3},
             ),
             Observation(
                 context={"activity": 30},
                 treatment=Treatment(**{"i": 2}),
-                outcome=Outcome(**{"outcome": 3}),
+                outcome={"outcome": 3},
             ),
         ]
     )
@@ -39,12 +39,12 @@ def test_observation_equality():
     left = Observation(
         context={"activity": 10},
         treatment=Treatment(**{"i": 0}),
-        outcome=Outcome(**{"outcome": 2}),
+        outcome={"outcome": 2},
     )
     right = Observation(
         context={"activity": 10},
         treatment=Treatment(**{"i": 0}),
-        outcome=Outcome(**{"outcome": 2}),
+        outcome={"outcome": 2},
     )
     assert left == right
 
@@ -53,33 +53,33 @@ def test_observation_inequality(simple_history):
     left = Observation(
         context={"activity": 10},
         treatment=Treatment(**{"i": 0}),
-        outcome=Outcome(**{"outcome": 2}),
+        outcome={"outcome": 2},
     )
 
     right_different_context = Observation(
         context={"activity": 9},
         treatment=Treatment(**{"i": 0}),
-        outcome=Outcome(**{"outcome": 2}),
+        outcome={"outcome": 2},
     )
     assert left != right_different_context
 
     right_different_treatment = Observation(
         context={"activity": 10},
         treatment=Treatment(**{"i": 1}),
-        outcome=Outcome(**{"outcome": 2}),
+        outcome={"outcome": 2},
     )
     assert left != right_different_treatment
 
     right_different_outcome = Observation(
         context={"activity": 10},
         treatment=Treatment(**{"i": 0}),
-        outcome=Outcome(**{"outcome": 3}),
+        outcome={"outcome": 3},
     )
     assert left != right_different_outcome
 
 
 def test_observation_comparison():
-    left = (Outcome(**{"outcome": 3}),)
-    right = (Outcome(**{"outcome": 2}),)
+    left = ({"outcome": 3},)
+    right = ({"outcome": 2},)
     assert left == left
     assert left != right

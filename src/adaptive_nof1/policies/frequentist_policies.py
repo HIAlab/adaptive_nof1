@@ -5,19 +5,19 @@ import random
 
 
 class FrequentistExploreThenCommit(Policy):
-    def __init__(self, number_of_actions, explore_blocks=5):
-        self.fixed_policy = FixedPolicy(number_of_actions)
+    def __init__(self, explore_blocks=5, **kwargs):
+        self.fixed_policy = FixedPolicy(**kwargs)
         self.explore_blocks = explore_blocks
 
         self.best_treatment = None
 
-        super().__init__(number_of_actions)
+        super().__init__(**kwargs)
 
     def __str__(self):
         return f"FrequentistExploreThenCommit:{self.explore_blocks} explore blocks."
 
     def choose_best_action(self, history):
-        outcome_groupby = history.to_df().groupby("treatment")["outcome"].mean()
+        outcome_groupby = history.to_df().groupby("treatment")[self.outcome_name].mean()
         best_row = outcome_groupby.idxmax()
         return best_row
 
@@ -33,16 +33,16 @@ class FrequentistExploreThenCommit(Policy):
 
 
 class FrequentistEpsilonGreedy(Policy):
-    def __init__(self, number_of_actions: int, epsilon: float):
+    def __init__(self, epsilon: float, **kwargs):
         self.epsilon = epsilon
         self.last_action = None
-        super().__init__(number_of_actions)
+        super().__init__(**kwargs)
 
     def __str__(self):
         return f"FrequentistEpsilonGreedy: {self.epsilon} epsilon"
 
     def choose_best_action(self, history):
-        outcome_groupby = history.to_df().groupby("treatment")["outcome"].mean()
+        outcome_groupby = history.to_df().groupby("treatment")[self.outcome_name].mean()
         best_row = outcome_groupby.idxmax()
         return best_row
 

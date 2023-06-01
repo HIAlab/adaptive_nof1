@@ -54,6 +54,6 @@ class SinotModel(Model):
             **{
                 "context": context,
                 "treatment": Treatment(i=action),
-                "outcome": Outcome(**{"outcome": -last_row["Uncertain_Low_Back_Pain"]}),
+                "outcome": {"outcome": -last_row["Uncertain_Low_Back_Pain"]},
             }
         )

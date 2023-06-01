@@ -73,7 +73,7 @@ class SeriesOfSimulations:
                             patient_id
                         ].policy.debug_information[index],
                         "context": str(observation.context),
-                        "outcome": observation.outcome.outcome,
+                        "outcome": str(observation.outcome),
                         "counterfactual_outcomes": str(
                             observation.counterfactual_outcomes
                         ),

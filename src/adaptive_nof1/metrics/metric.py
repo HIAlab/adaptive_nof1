@@ -14,6 +14,9 @@ from sklearn.preprocessing import minmax_scale
 
 
 class Metric(ABC):
+    def __init__(self, outcome_name="outcome"):
+        self.outcome_name = outcome_name
+
     @abstractmethod
     def score(self, simulation: Simulation) -> float:
         pass
