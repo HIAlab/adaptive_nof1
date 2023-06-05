@@ -14,9 +14,13 @@ class ComposedPolicy(Policy):
         durations: List[int],
         block_length=None,
         number_of_actions=None,
+        treatment_names: List[str] | None = None,
     ):
         super().__init__(number_of_actions=number_of_actions)
         self.policies = policies
+        if treatment_names:
+            for name, policy in zip(treatment_names, policies):
+                policy.treatment_name = name
         self.switch_points = numpy.cumsum(durations)
         self.current_index = 0
         self.block_length = block_length

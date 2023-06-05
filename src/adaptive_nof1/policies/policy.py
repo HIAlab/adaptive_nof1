@@ -20,4 +20,7 @@ class Policy(ABC):
         pass
 
     def available_actions(self):
-        return range(1, self.number_of_actions + 1)
+        return [
+            {self.treatment_name: action}
+            for action in range(1, self.number_of_actions + 1)
+        ]

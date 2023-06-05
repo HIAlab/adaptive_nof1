@@ -9,14 +9,16 @@ import random
 class UpperConfidenceBound(Policy):
     def __init__(self, number_of_actions: int, epsilon: float):
         self.epsilon = epsilon
-        self.inference = GaussianAverageTreatmentEffect()
+        self.inference = GaussianAverageTreatmentEffect(
+            treatment_name=self.treatment_name
+        )
         super().__init__(number_of_actions)
 
     def __str__(self):
         return f"UpperConfidenceBound: {self.epsilon} epsilon"
 
     def choose_best_action(self, history):
-        outcome_groupby = history.to_df().groupby("treatment")["outcome"].mean()
+        outcome_groupby = history.to_df().groupby(self.treatment_name)["outcome"].mean()
         best_row = outcome_groupby.idxmin()
         return best_row
 
@@ -45,13 +47,22 @@ class ThompsonSampling(Policy):
     def __str__(self):
         return f"ThompsonSampling({self.inference})"
 
-    def choose_action(self, history, _, block_length=None):
-        if len(history) % self.posterior_update_interval == 0 or not hasattr(
-            self.inference, "trace"
+    def choose_action(self, history, context, block_length=None):
+        if len(history) == 0:
+            self._debug_information += ["len(History) == 0"]
+            return {
+                self.treatment_name: random.choices(range(self.number_of_actions))[0]
+                + 1
+            }
+
+        if (
+            len(history) % self.posterior_update_interval == 0
+            or self.inference.trace is None
         ):
             self.inference.update_posterior(history, self.number_of_actions)
+
         probability_array = self.inference.approximate_max_probabilities(
-            self.number_of_actions
+            self.number_of_actions, context
         )
         action = (
             random.choices(range(self.number_of_actions), weights=probability_array)[0]
@@ -60,7 +71,7 @@ class ThompsonSampling(Policy):
         self._debug_information += [
             f"Probabilities for picking: {numpy.array_str(probability_array, precision=2, suppress_small=True)}, chose {action}"
         ]
-        return action
+        return {self.treatment_name: action}
 
 
 class ClippedThompsonSampling(Policy):
@@ -116,7 +127,8 @@ class ClippedHistoryAwareThompsonSampling(Policy):
             0.9,
         )
         last_three_actions = [
-            observation.treatment.i for observation in history.observations[-3:]
+            observation.treatment[self.treatment_name]
+            for observation in history.observations[-3:]
         ]
 
         # Penalize using the same action

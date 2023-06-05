@@ -53,7 +53,7 @@ class SeriesOfSimulations:
             data=pd.concat(dataframes),
             x="t",
             y="score",
-            hue="Simulation",
+            hue="simulation",
         )
         ax.set(xlabel="t", ylabel="Regret")
         sns.move_legend(ax, "upper left", bbox_to_anchor=(1, 1))
@@ -90,6 +90,7 @@ class SeriesOfSimulations:
                     "context",
                     "outcome",
                     "counterfactual_outcomes",
+                    treatment_name,
                 ],
                 cmap="Category10",
                 clim=(0, 10),

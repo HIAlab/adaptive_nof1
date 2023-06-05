@@ -26,11 +26,12 @@ class FrequentistExploreThenCommit(Policy):
     def choose_action(self, history, _, block_length=1):
         if self.best_treatment:
             self._debug_information += ["Commit"]
-            return self.best_treatment
+            return {self.treatment_name: self.best_treatment}
         if len(history) >= self.explore_blocks * block_length:
-            self._debug_information += ["Explore"]
+            self._debug_information += ["Commit"]
             self.best_treatment = self.choose_best_action(history)
-            return self.best_treatment
+            return {self.treatment_name: self.best_treatment}
+        self._debug_information += ["Fixed Schedule"]
         return self.fixed_policy.choose_action(history, _, block_length)
 
 
@@ -53,11 +54,13 @@ class FrequentistEpsilonGreedy(Policy):
     def choose_action(self, history, _, block_length=1):
         if len(history) < self.number_of_actions * block_length:
             self._debug_information += ["Initial Round"]
-            return len(history) // block_length + 1
+            return {self.treatment_name: len(history) // block_length + 1}
 
         if random.random() < self.epsilon:
             self._debug_information += ["Uniform Exploration"]
-            return random.choice(range(self.number_of_actions)) + 1
+            return {
+                self.treatment_name: random.choice(range(self.number_of_actions)) + 1
+            }
 
         self._debug_information += ["Exploit"]
-        return self.choose_best_action(history)
+        return {self.treatment_name: self.choose_best_action(history)}
