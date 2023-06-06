@@ -4,6 +4,8 @@ import numpy as np
 import pandas
 import pymc
 import arviz
+import sklearn
+from sklearn.metrics import classification_report
 
 
 class BayesianModel:
@@ -270,6 +272,30 @@ class BernoulliLogItInferenceModel(BayesianModel):
             )
             self.trace = pymc.sample(2000, progressbar=False)
 
+    def predict_for_history(self, history, number_of_treatments):
+        df = history.to_df()
+        with self.model:
+            pymc.set_data(
+                {
+                    "coefficient_values": self.data_to_coefficient_matrix(df),
+                    "treatment_selection_matrix": self.data_to_treatment_matrix(
+                        df, number_of_treatments
+                    ),
+                }
+            )
+            return pymc.sample_posterior_predictive(
+                self.trace,
+                var_names=["outcome"],
+            )
+
+    def classification_scores(self, history, number_of_treatments):
+        trace = self.predict_for_history(history, number_of_treatments)
+        predicted_outcome = arviz.extract(
+            trace.posterior_predictive, var_names="outcome", num_samples=1
+        )
+        outcome = (history.to_df()[self.outcome_name] + 1) / 2
+        return classification_report(y_true=outcome, y_pred=predicted_outcome)
+
     def approximate_max_probabilities(self, number_of_treatments, context):
         assert (
             self.trace is not None
@@ -279,7 +305,7 @@ class BernoulliLogItInferenceModel(BayesianModel):
         df[self.treatment_name] = range(1, number_of_treatments + 1)
 
         with self.model:
-            local_coefficients = pymc.set_data(
+            pymc.set_data(
                 {
                     "coefficient_values": self.data_to_coefficient_matrix(df),
                     "treatment_selection_matrix": self.data_to_treatment_matrix(

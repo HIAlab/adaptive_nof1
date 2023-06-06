@@ -47,13 +47,23 @@ class SeriesOfSimulations:
         return df
 
     @staticmethod
-    def plot_lines(listofseries: List[SeriesOfSimulations], metric):
-        dataframes = [score_df(series.simulations, [metric]) for series in listofseries]
+    def score_data(list_of_series: List[SeriesOfSimulations], metric):
+        dataframes = [
+            score_df(series.simulations, [metric]) for series in list_of_series
+        ]
+        return pd.concat(
+            dataframes,
+        )
+
+    @staticmethod
+    def plot_lines(list_of_series: List[SeriesOfSimulations], metric):
         ax = sns.lineplot(
-            data=pd.concat(dataframes),
+            data=SeriesOfSimulations.score_data(list_of_series, metric),
             x="t",
             y="score",
             hue="simulation",
+            units="patient_id",
+            estimator=None,
         )
         ax.set(xlabel="t", ylabel="Regret")
         sns.move_legend(ax, "upper left", bbox_to_anchor=(1, 1))

@@ -35,10 +35,9 @@ class CombinedPolicy(Policy):
             contexts = split_with_postfix(context)
         else:
             contexts = [context] * len(self.policies)
-        actions = {
-            policy.treatment_name: policy.choose_action(history, context)
-            for policy, context in zip(self.policies, contexts)
-        }
+        actions = {}
+        for policy, context in zip(self.policies, contexts):
+            actions.update(policy.choose_action(history, context))
         return actions
 
     def available_actions(self):

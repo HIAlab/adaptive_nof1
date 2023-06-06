@@ -28,9 +28,10 @@ class Metric(ABC):
                     "t": range(len(simulation.history)),
                     "score": self.score(simulation),
                     "simulation": str(simulation),
+                    "patient_id": index,
                 }
             )
-            for simulation in simulations
+            for index, simulation in enumerate(simulations)
         ]
 
         return pd.concat(df_list)
