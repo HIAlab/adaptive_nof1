@@ -52,6 +52,7 @@ class Simulation:
             }
         )
         self.history.add_observation(observation)
+        return self
 
     def __getitem__(self, index):
         return dataclasses.replace(self, history=self.history[index])

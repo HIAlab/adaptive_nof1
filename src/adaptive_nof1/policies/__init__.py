@@ -11,3 +11,4 @@ from .frequentist_policies import FrequentistEpsilonGreedy, FrequentistExploreTh
 from .policy import Policy
 from .composed_policy import ComposedPolicy
 from .combined_policy import CombinedPolicy
+from .crossover_policy import CrossoverPolicy

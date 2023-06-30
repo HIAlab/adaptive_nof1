@@ -1,11 +1,13 @@
+from ctypes import c_void_p
 import logging
 
 import numpy as np
 import pandas
+from adaptive_nof1.helpers import index_from_subset, index_to_actions, index_to_values
 import pymc
 import arviz
-import sklearn
 from sklearn.metrics import classification_report
+from typing import List
 
 
 class BayesianModel:
@@ -18,6 +20,9 @@ class BayesianModel:
         return arviz.hdi(
             self.trace.posterior, var_names=[variable_name], hdi_prob=1 - epsilon
         )
+
+    def data_to_coefficient_matrix(self, df):
+        return df[self.coefficient_names].to_numpy()
 
     def approximate_max_probabilities(self, number_of_treatments):
         max_indices = np.ravel(
@@ -104,7 +109,7 @@ class FixedVarianceNormalEffect(BayesianModel):
             self.trace = pymc.sample(2000, progressbar=False)
 
 
-class LinearAdditiveModel(BayesianModel):
+class LinearAdditiveInferenceModel(BayesianModel):
     def __init__(self, coefficient_names, effect_variance, random_variance, **kwargs):
         self.coefficient_names = coefficient_names
         self.effect_variance = effect_variance
@@ -114,16 +119,33 @@ class LinearAdditiveModel(BayesianModel):
     def __str__(self):
         return f"LinearAdditiveModel"
 
+    def data_to_treatment_matrix(self, df, number_of_treatments):
+        # Creating a Categorical Series makes get_dummies also create dummies for treatments which are not present in the dataset yet
+        treatment_dummies = pandas.get_dummies(
+            pandas.Categorical(
+                df[self.treatment_name] - 1, categories=range(number_of_treatments)
+            )
+        )
+        return pymc.floatX(treatment_dummies.to_numpy())
+
     def update_posterior(self, history, number_of_treatments):
         df = history.to_df()
 
         self.model = pymc.Model()
         with self.model:
             logger = logging.getLogger("pymc")
-            # logger.disabled = False
-            treatment_dummies = pandas.get_dummies(df[self.treatment_name])
+            logger.disabled = False
 
-            treatment_selection_matrix = treatment_dummies.to_numpy()
+            treatment_selection_matrix = pymc.MutableData(
+                "treatment_selection_matrix",
+                self.data_to_treatment_matrix(df, number_of_treatments),
+                dims=("obs_id", "treatment_id"),
+            )
+            coefficient_values = pymc.MutableData(
+                "coefficient_values",
+                self.data_to_coefficient_matrix(df),
+                dims=("obs_id", "coefficient_id"),
+            )  # n * number_of_coefficients
             intercept = pymc.Normal(
                 "intercept",
                 mu=0,
@@ -136,21 +158,19 @@ class LinearAdditiveModel(BayesianModel):
                 mu=0,
                 sigma=self.effect_variance,
                 shape=(number_of_treatments, len(self.coefficient_names)),
+                dims=("treatment_id", "coefficient_id"),
             )
 
-            for treatment in treatment_dummies.columns:
-                local_coefficients = df[
-                    self.coefficient_names
-                ].to_numpy()  # n * number_of_coefficien
-                local_slopes = slopes[treatment - 1]  # 1 * number_of_coefficients
+            for treatment_index in range(number_of_treatments):
+                local_slopes = slopes[treatment_index]  # 1 * number_of_coefficients
 
-                local_summand = pymc.math.dot(local_coefficients, local_slopes.T)
+                local_summand = pymc.math.dot(coefficient_values, local_slopes.T)
                 masked_summand = pymc.floatX(
                     pymc.math.prod(
                         pymc.math.stack(
                             [
                                 local_summand,
-                                treatment_selection_matrix[:, treatment - 1],
+                                treatment_selection_matrix[:, treatment_index],
                             ]
                         ),
                         axis=0,
@@ -158,21 +178,175 @@ class LinearAdditiveModel(BayesianModel):
                 )
                 mu += masked_summand
 
+            linear_regression = pymc.Deterministic(
+                "linear_regression", var=mu, dims="obs_id"
+            )
+
             outcome = pymc.Normal(
                 "outcome",
-                mu=mu,
-                observed=df[self.outcome_name],
+                mu=linear_regression,
                 sigma=self.random_variance,
+                observed=df[self.outcome_name],
+                dims="obs_id",
             )
             self.trace = pymc.sample(2000, progressbar=False)
 
-    def approximate_max_probabilities(self, number_of_treatments):
+    def approximate_max_probabilities(self, number_of_treatments, context):
         assert (
             self.trace is not None
         ), "You called `approximate_max_probabilites` without updating the posterior"
 
-        max_indices = np.ravel(
-            self.trace["posterior"]["intercept"].argmax(dim="intercept_dim_0")
+        df = pandas.DataFrame([context] * number_of_treatments)
+        df[self.treatment_name] = range(1, number_of_treatments + 1)
+
+        with self.model:
+            pymc.set_data(
+                {
+                    "coefficient_values": self.data_to_coefficient_matrix(df),
+                    "treatment_selection_matrix": self.data_to_treatment_matrix(
+                        df, number_of_treatments
+                    ),
+                }
+            )  # n * number_of_coefficients
+            pymc.sample_posterior_predictive(
+                self.trace,
+                var_names=["linear_regression"],
+                extend_inferencedata=True,
+            )
+
+        max_indices = arviz.extract(
+            self.trace.posterior_predictive
+        ).linear_regression.argmax(dim="obs_id")
+        bin_counts = np.bincount(max_indices, minlength=number_of_treatments)
+        return bin_counts / np.sum(bin_counts)
+
+
+def flatten(arrays):
+    return [element for array in arrays for element in array]
+
+
+class InterlinkedPillInferenceModel(BayesianModel):
+    def __init__(
+        self,
+        number_of_actions: List[int],
+        treatment_names: List[str],
+        coefficient_names_per_treatment: List[List[str]],
+        outcome_name="outcome",
+        **kwargs,
+    ):
+        self.number_of_actions = number_of_actions
+        self.treatment_names = treatment_names
+        self.coefficient_names_per_treatment = coefficient_names_per_treatment
+        self.coefficient_names = flatten(coefficient_names_per_treatment)
+        self.outcome_name = outcome_name
+        super().__init__(**kwargs)
+        self.setup_model()
+
+    def data_to_treatment_indices(self, df):
+        return pymc.intX(df[self.treatment_names].to_numpy())
+
+    def setup_model(self):
+        empty_df = pandas.DataFrame(
+            columns=self.treatment_names + self.coefficient_names + [self.outcome_name],
+            dtype=float,
+        )
+
+    def update_posterior(self, history, _):
+        df = history.to_df()
+        self.model = pymc.Model()
+        with self.model:
+            treatment_indices = pymc.MutableData(
+                "treatment_indices",
+                self.data_to_treatment_indices(df),
+                dims=("obs_id", "treatment_number"),
+            )
+            coefficient_values = pymc.MutableData(
+                "coefficient_values",
+                self.data_to_coefficient_matrix(df),
+                dims=("obs_id", "coefficient_number"),
+            )
+            observed_outcomes = pymc.MutableData(
+                "observed_outcomes", df[self.outcome_name], dims="obs_id"
+            )
+
+            mu = 0
+            for treatment_number in range(len(self.number_of_actions)):
+                intercept = pymc.Normal(
+                    f"intercept_{self.treatment_names[treatment_number]}",
+                    mu=0,
+                    sigma=1,
+                    shape=self.number_of_actions[treatment_number],
+                    dims="treatment",
+                )
+                intercept_summand = intercept[treatment_indices[:, treatment_number]]
+                mu += intercept_summand
+
+                coefficient_names_for_treatment = self.coefficient_names_per_treatment[
+                    treatment_number
+                ]
+                if len(coefficient_names_for_treatment) > 0:
+                    slopes = pymc.Normal(
+                        f"slopes_{self.treatment_names[treatment_number]}",
+                        mu=0,
+                        sigma=1,
+                        shape=(
+                            self.number_of_actions[treatment_number],
+                            len(self.coefficient_names_per_treatment[treatment_number]),
+                        ),
+                        dims=("treatment_number", "coefficient_number"),
+                    )
+                    coefficient_indices = index_from_subset(
+                        self.coefficient_names, coefficient_names_for_treatment
+                    )
+                    coefficient_summand = (
+                        coefficient_values[:, coefficient_indices] * slopes.T
+                    )[:, treatment_indices[:, treatment_number]][:, 0]
+                    mu += coefficient_summand
+
+                # print(f"intercept[treatment_indices[:, treatment_number]]{intercept[treatment_indices[:, treatment_number]].eval()}")
+                # print(f"(coefficient_values[:, coefficient_indices] * slopes.T)[:, treatment_indices[:, treatment_number]]{(coefficient_values[:, coefficient_indices] * slopes.T)[:, treatment_indices[:, treatment_number]][:, 0].eval()}")
+                # print(f"mu:{mu.eval()}")
+
+            outcome = pymc.Normal(
+                "outcome",
+                mu=mu,
+                sigma=1,
+                observed=observed_outcomes,
+                dims="obs_id",
+            )
+            self.trace = pymc.sample(2000, progressbar=False)
+
+    def approximate_max_probabilities(self, number_of_treatments, context):
+        assert (
+            self.trace is not None
+        ), "You called `approximate_max_probabilites` without updating the posterior"
+
+        df = pandas.DataFrame([context] * number_of_treatments)
+        df["treatment_index"] = range(number_of_treatments)
+        actions = [
+            index_to_actions(
+                treatment_index, self.number_of_actions, self.treatment_names
+            )
+            for treatment_index in range(number_of_treatments)
+        ]
+        for name in self.treatment_names:
+            df[name] = [action[name] for action in actions]
+
+        with self.model:
+            pymc.set_data(
+                {
+                    "coefficient_values": self.data_to_coefficient_matrix(df),
+                    "treatment_indices": self.data_to_treatment_indices(df),
+                }
+            )  # n * number_of_coefficients
+            pymc.sample_posterior_predictive(
+                self.trace,
+                var_names=["outcome"],
+                extend_inferencedata=True,
+            )
+
+        max_indices = arviz.extract(self.trace.posterior_predictive).outcome.argmax(
+            dim="obs_id"
         )
         bin_counts = np.bincount(max_indices, minlength=number_of_treatments)
         return bin_counts / np.sum(bin_counts)
@@ -196,9 +370,6 @@ class BernoulliLogItInferenceModel(BayesianModel):
             )
         )
         return pymc.floatX(treatment_dummies.to_numpy())
-
-    def data_to_coefficient_matrix(self, df):
-        return df[self.coefficient_names].to_numpy()
 
     def update_posterior(self, history, number_of_treatments):
         df = history.to_df()

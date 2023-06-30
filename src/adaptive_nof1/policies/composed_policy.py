@@ -43,7 +43,7 @@ class ComposedPolicy(Policy):
     def choose_action(self, history, context):
         if len(history) > self.switch_points[
             self.current_index
-        ] and self.current_index < len(self.policies):
+        ] and self.current_index + 1 < len(self.policies):
             self.current_index += 1
 
         current_policy = self.policies[self.current_index]

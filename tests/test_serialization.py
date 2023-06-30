@@ -18,7 +18,7 @@ NUMBER_OF_PATIENTS = 5
 @pytest.fixture
 def series():
     return SeriesOfSimulations(
-        model_from_patient_id= lambda patient_id: PillModel(patient_id),
+        model_from_patient_id=lambda patient_id: PillModel(patient_id),
         n_patients=NUMBER_OF_PATIENTS,
         policy=CombinedPolicy(
             [
@@ -33,12 +33,14 @@ def series():
 def test_idempotency(series):
     pickled_series = pickle.dumps(series)
     reconstructed_series = pickle.loads(pickled_series)
-    
+
     assert len(reconstructed_series.simulations) != 0
     assert len(reconstructed_series.simulations) == len(series.simulations)
 
-    for simulation, reconstructed_simulation in zip(series.simulations, reconstructed_series.simulations):
+    for simulation, reconstructed_simulation in zip(
+        series.simulations, reconstructed_series.simulations
+    ):
         simulation.step()
         reconstructed_simulation.step()
-        
+
         assert simulation.history == reconstructed_simulation.history

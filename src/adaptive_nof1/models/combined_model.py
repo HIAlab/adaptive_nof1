@@ -1,7 +1,7 @@
 from typing import List
 
 from adaptive_nof1.basic_types import Observation, History, Context
-from adaptive_nof1.dict_helpers import merge_with_postfix, split_with_postfix
+from adaptive_nof1.helpers import merge_with_postfix, split_with_postfix
 from adaptive_nof1.models.model import Model
 
 
