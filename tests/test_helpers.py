@@ -33,6 +33,8 @@ def test_index_from_subset():
     assert index_from_subset(number_array, number_subset) == [42, 1, 3]
     assert index_from_subset(number_array, number_subset_reversed) == [3, 1, 42]
 
+    assert index_from_subset([1, 2, 3], [1, 2, 3]) == [0, 1, 2]
+
     with pytest.raises(AssertionError):
         index_from_subset(string_array, number_subset)
 

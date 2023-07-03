@@ -26,7 +26,7 @@ def split_with_postfix(dict: Dict) -> List[Dict]:
 
 
 def index_from_subset(array, subset):
-    assert set(subset) < set(array), "Given Subset is not a subset of array"
+    assert set(subset) <= set(array), "Given Subset is not a subset of array"
     return [array.index(string) for string in subset]
 
 
