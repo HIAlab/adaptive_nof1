@@ -8,8 +8,10 @@ import pandas
 import numpy
 import arviz
 
+
 def flatten(arrays):
     return [element for array in arrays for element in array]
+
 
 class InterlinkedAdditiveModel(BayesianModel):
     def __init__(
@@ -22,16 +24,22 @@ class InterlinkedAdditiveModel(BayesianModel):
         self.action_dimensions = action_dimensions
         self.action_names = action_names
         self.coefficient_names_per_treatment = coefficient_names_per_treatment
-        self.coefficient_names = flatten(coefficient_names_per_treatment)
+        self.coefficient_names = list(
+            numpy.unique(flatten(coefficient_names_per_treatment))
+        )
         self.model = None
         super().__init__(**kwargs)
 
     def data_to_treatment_indices(self, df):
-        return pymc.intX(df[self.action_names].to_numpy())
+        return pymc.intX((df[self.action_names] - 1).to_numpy())
 
     def setup_model(self):
         empty_df = pandas.DataFrame(
-            columns=self.action_names + self.coefficient_names + [self.outcome_name],
+            columns=list(
+                numpy.unique(
+                    self.action_names + self.coefficient_names + [self.outcome_name]
+                )
+            ),
             dtype=float,
         )
         self.model = pymc.Model()
@@ -40,11 +48,6 @@ class InterlinkedAdditiveModel(BayesianModel):
                 "treatment_indices",
                 self.data_to_treatment_indices(empty_df),
                 dims=("obs_id", "treatment_number"),
-            )
-            coefficient_values = pymc.MutableData(
-                "coefficient_values",
-                self.data_to_coefficient_matrix(empty_df),
-                dims=("obs_id", "coefficient_number"),
             )
             observed_outcomes = pymc.MutableData(
                 "observed_outcomes", empty_df[self.outcome_name], dims="obs_id"
@@ -57,7 +60,7 @@ class InterlinkedAdditiveModel(BayesianModel):
                     mu=0,
                     sigma=1,
                     shape=self.action_dimensions[treatment_number],
-                    dims="treatment",
+                    dims=f"treatment_{self.action_names[treatment_number]}",
                 )
                 intercept_summand = intercept[treatment_indices[:, treatment_number]]
                 mu += intercept_summand
@@ -75,23 +78,21 @@ class InterlinkedAdditiveModel(BayesianModel):
                             self.action_dimensions[treatment_number],
                             len(self.coefficient_names_per_treatment[treatment_number]),
                         ),
-                        dims=("treatment_number", "coefficient_number"),
+                        dims=(f"treatment_number_{self.action_names[treatment_number]}", f"coefficient_number_{self.action_names[treatment_number]}"),
                     )
-                    print("slopes shape", slopes.shape.eval())
-                    coefficient_indices = index_from_subset(
-                        self.coefficient_names, coefficient_names_for_treatment,
+                    coefficients_for_treatment = pymc.MutableData(
+                        f"coefficients_for_treatment_{self.action_names[treatment_number]}",
+                        self.coefficients_for_treatment(treatment_number, empty_df),
+                        dims=("obs_id", f"coefficient_number_{self.action_names[treatment_number]}"),
                     )
-                    slopes_for_applied_treatments = slopes[treatment_indices[:, treatment_number]]
-                    print("slopes_for_applied_treatments shape", slopes_for_applied_treatments.shape.eval())
-                    print("slopes_for_applied_treatments", slopes_for_applied_treatments.eval())
-
-                    coefficients_for_treatment = coefficient_values[:, coefficient_indices]
-                    print("coefficients_for_treatment shape", coefficients_for_treatment.shape.eval())
-                    print("coefficients_for_treatment", coefficients_for_treatment.eval())
-                    coefficient_summand = (
-                        pymc.math.dot(coefficients_for_treatment, slopes_for_applied_treatments.T).diagonal()
+                    slopes_for_applied_treatments = slopes[
+                        treatment_indices[:, treatment_number]
+                    ]
+                    coefficient_summand = pymc.math.extract_diag(
+                        pymc.math.dot(
+                            coefficients_for_treatment, slopes_for_applied_treatments.T
                         )
-                    print("coefficient_summand shape", coefficient_summand.shape.eval())
+                    )
                     mu += coefficient_summand
 
                 # print(f"intercept[treatment_indices[:, treatment_number]]{intercept[treatment_indices[:, treatment_number]].eval()}")
@@ -106,19 +107,37 @@ class InterlinkedAdditiveModel(BayesianModel):
                 dims="obs_id",
             )
 
+    def coefficients_for_treatment(self, treatment_number, df):
+        coefficient_values = self.data_to_coefficient_matrix(df)
+        coefficient_names_for_treatment = self.coefficient_names_per_treatment[
+            treatment_number
+        ]
+        coefficient_indices = index_from_subset(
+            self.coefficient_names,
+            coefficient_names_for_treatment,
+        )
+        coefficients_for_treatment = coefficient_values[:, coefficient_indices]
+        return coefficients_for_treatment
 
     def update_posterior(self, history, _):
         df = history.to_df()
-        
+
         if not self.model:
             self.setup_model()
+
+        coefficient_values = {
+            f"coefficients_for_treatment_{self.action_names[treatment_number]}": self.coefficients_for_treatment(
+                treatment_number, df
+            )
+            for treatment_number in range(len(self.action_names))
+        }
 
         with self.model:
             pymc.set_data(
                 {
-                    "coefficient_values": self.data_to_coefficient_matrix(df),
                     "treatment_indices": self.data_to_treatment_indices(df),
                     "observed_outcomes": df[self.outcome_name],
+                    **coefficient_values,
                 }
             )
             self.trace = pymc.sample(2000, progressbar=False)
@@ -128,23 +147,34 @@ class InterlinkedAdditiveModel(BayesianModel):
             self.trace is not None
         ), "You called `approximate_max_probabilites` without updating the posterior"
 
-        df = pandas.DataFrame([context] * number_of_treatments)
+        df = pandas.DataFrame(
+            [context] * number_of_treatments,
+            columns=self.action_names + self.coefficient_names + [self.outcome_name],
+        )
         df["treatment_index"] = range(number_of_treatments)
         actions = [
-            index_to_actions(
-                treatment_index, self.action_dimensions, self.action_names
-            )
+            index_to_actions(treatment_index, self.action_dimensions, self.action_names)
             for treatment_index in range(number_of_treatments)
         ]
         for name in self.action_names:
             df[name] = [action[name] for action in actions]
 
+        # Eliminate duplicate columns
+        df = df.loc[:, ~df.columns.duplicated()].copy()
+
+        coefficient_values = {
+            f"coefficients_for_treatment_{self.action_names[treatment_number]}": self.coefficients_for_treatment(
+                treatment_number, df
+            )
+            for treatment_number in range(len(self.action_names))
+        }
+
         with self.model:
             pymc.set_data(
                 {
-                    "coefficient_values": self.data_to_coefficient_matrix(df),
                     "treatment_indices": self.data_to_treatment_indices(df),
-                }
+                    **coefficient_values,
+                },
             )  # n * number_of_coefficients
             pymc.sample_posterior_predictive(
                 self.trace,

@@ -64,6 +64,7 @@ class ThompsonSampling(Policy):
         probability_array = self.inference.approximate_max_probabilities(
             self.number_of_actions, context
         )
+        print(probability_array)
         action = (
             random.choices(range(self.number_of_actions), weights=probability_array)[0]
             + 1

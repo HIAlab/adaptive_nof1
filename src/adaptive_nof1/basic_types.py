@@ -62,7 +62,11 @@ class History:
             }
             for observation in self.observations
         ]
-        return pd.DataFrame(dict_list)
+        df = pd.DataFrame(dict_list)
+
+        # Eliminate duplicate columns
+        df = df.loc[:,~df.columns.duplicated()].copy()
+        return df
 
     def __getitem__(self, index) -> History:
         if isinstance(index, slice):

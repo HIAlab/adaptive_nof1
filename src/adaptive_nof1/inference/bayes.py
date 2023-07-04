@@ -21,7 +21,9 @@ class BayesianModel:
         )
 
     def data_to_coefficient_matrix(self, df):
-        return df[self.coefficient_names].to_numpy()
+        data = df[self.coefficient_names].to_numpy()
+        data.shape = (len(df), len(self.coefficient_names))
+        return data
 
     def approximate_max_probabilities(self, number_of_treatments):
         max_indices = np.ravel(
