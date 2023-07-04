@@ -13,23 +13,24 @@ class ComposedPolicy(Policy):
         policies: List[Policy],
         durations: List[int],
         block_length=None,
-        number_of_actions=None,
         treatment_name: str | None = None,
+        **kwargs,
     ):
         self.policies = policies
-        super().__init__(number_of_actions=number_of_actions)
 
         self.switch_points = numpy.cumsum(durations)
         self.current_index = 0
         self.block_length = block_length
-        # self.treatment_name = treatment_name
+        self._treatment_name = treatment_name
+        super().__init__(**kwargs)
 
     @property
     def treatment_name(self):
-        return self.treatment_name
+        return self._treatment_name
 
     @treatment_name.setter
     def treatment_name(self, name):
+        self._treatment_name = name
         for policy in self.policies:
             policy.treatment_name = name
 
@@ -48,7 +49,8 @@ class ComposedPolicy(Policy):
 
         current_policy = self.policies[self.current_index]
         return current_policy.choose_action(
-            history, context, block_length=self.block_length
+            history,
+            context,
         )
 
     def plot(self):
@@ -58,3 +60,6 @@ class ComposedPolicy(Policy):
             pyplot.axvspan(
                 first, second, facecolor=colors[index % len(colors)], alpha=0.1
             )
+
+    def available_actions(self):
+        return []

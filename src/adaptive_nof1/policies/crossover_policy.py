@@ -16,11 +16,11 @@ class CrossoverPolicy(Policy):
         action_names: List[str],
     ):
         assert len(action_dimensions) == len(action_names)
-        super().__init__(number_of_actions=action_dimensions)
         self.policy = policy
         self.action_dimensions = action_dimensions
         self.action_names = action_names
         self.max_index = reduce(operator.mul, action_dimensions)
+        super().__init__(number_of_actions=self.max_index)
 
     def __str__(self):
         return f"CrossoverPolicy({self.policy})"
