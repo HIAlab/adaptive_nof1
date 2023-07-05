@@ -30,6 +30,9 @@ class InterlinkedAdditiveModel(BayesianModel):
         self.model = None
         super().__init__(**kwargs)
 
+    def __str__(self):
+        return "InterlinkedAdditiveModel"
+
     def data_to_treatment_indices(self, df):
         return pymc.intX((df[self.action_names] - 1).to_numpy())
 
@@ -78,12 +81,18 @@ class InterlinkedAdditiveModel(BayesianModel):
                             self.action_dimensions[treatment_number],
                             len(self.coefficient_names_per_treatment[treatment_number]),
                         ),
-                        dims=(f"treatment_number_{self.action_names[treatment_number]}", f"coefficient_number_{self.action_names[treatment_number]}"),
+                        dims=(
+                            f"treatment_number_{self.action_names[treatment_number]}",
+                            f"coefficient_number_{self.action_names[treatment_number]}",
+                        ),
                     )
                     coefficients_for_treatment = pymc.MutableData(
                         f"coefficients_for_treatment_{self.action_names[treatment_number]}",
                         self.coefficients_for_treatment(treatment_number, empty_df),
-                        dims=("obs_id", f"coefficient_number_{self.action_names[treatment_number]}"),
+                        dims=(
+                            "obs_id",
+                            f"coefficient_number_{self.action_names[treatment_number]}",
+                        ),
                     )
                     slopes_for_applied_treatments = slopes[
                         treatment_indices[:, treatment_number]

@@ -222,7 +222,6 @@ class LinearAdditiveInferenceModel(BayesianModel):
         return bin_counts / np.sum(bin_counts)
 
 
-
 class BernoulliLogItInferenceModel(BayesianModel):
     def __init__(self, coefficient_names, effect_variance, random_variance, **kwargs):
         self.coefficient_names = coefficient_names

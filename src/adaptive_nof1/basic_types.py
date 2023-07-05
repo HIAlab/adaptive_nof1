@@ -65,7 +65,7 @@ class History:
         df = pd.DataFrame(dict_list)
 
         # Eliminate duplicate columns
-        df = df.loc[:,~df.columns.duplicated()].copy()
+        df = df.loc[:, ~df.columns.duplicated()].copy()
         return df
 
     def __getitem__(self, index) -> History:

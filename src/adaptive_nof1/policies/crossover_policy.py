@@ -31,10 +31,16 @@ class CrossoverPolicy(Policy):
     def index_to_actions(self, index):
         return index_to_actions(index, self.action_dimensions, self.action_names)
 
+    def crossover_index_treatment_name(self):
+        return "_".join(["crossover_index"] + self.action_names)
+
     def transform_history(self, history):
-        for observation in copy.deepcopy(history).observations:
+        history = copy.deepcopy(history)
+        for observation in history.observations:
             actions = observation.treatment
-            actions["treatment"] = self.actions_to_index(actions)
+            actions[self.crossover_index_treatment_name()] = self.actions_to_index(
+                actions
+            )
         return history
 
     def choose_action(self, history, context):
@@ -42,7 +48,9 @@ class CrossoverPolicy(Policy):
             self.policy.treatment_name
         ]
         action_index = action - 1
-        self._debug_information += [f"CrossoverIndex: {action_index}"]
+        self._debug_information += [
+            f"{self.crossover_index_treatment_name()}: {action_index}"
+        ]
         return self.index_to_actions(action_index)
 
     def available_actions(self):

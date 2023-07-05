@@ -38,7 +38,10 @@ class UpperConfidenceBound(Policy):
 
 class ThompsonSampling(Policy):
     def __init__(
-        self, inference_model, posterior_update_interval=1, **kwargs,
+        self,
+        inference_model,
+        posterior_update_interval=1,
+        **kwargs,
     ):
         self.inference = inference_model
         self.posterior_update_interval = posterior_update_interval
