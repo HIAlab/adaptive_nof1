@@ -47,9 +47,9 @@ class SeriesOfSimulations:
         return df
 
     @staticmethod
-    def score_data(list_of_series: List[SeriesOfSimulations], metric):
+    def score_data(list_of_series: List[SeriesOfSimulations], metrics):
         dataframes = [
-            score_df(series.simulations, [metric]) for series in list_of_series
+            score_df(series.simulations, metrics) for series in list_of_series
         ]
         return pd.concat(
             dataframes,
@@ -76,12 +76,23 @@ class SeriesOfSimulations:
         )
 
     @staticmethod
-    def plot_lines(list_of_series: List[SeriesOfSimulations], metric):
+    def plot_lines(list_of_series: List[SeriesOfSimulations], metrics):
+        scored_df = score_df(
+            [
+                simulation
+                for series in list_of_series
+                for simulation in series.simulations
+            ],
+            metrics,
+            minmax_normalization=False,
+        )
+        scored_df["simulation_x_metric"] = scored_df["simulation"] + scored_df["metric"]
+        print(scored_df)
         ax = sns.lineplot(
-            data=SeriesOfSimulations.score_data(list_of_series, metric),
+            data=scored_df,
             x="t",
             y="score",
-            hue="simulation",
+            hue="simulation_x_metric",
             # units="patient_id",
             # estimator=None,
         )
