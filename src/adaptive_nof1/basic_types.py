@@ -69,7 +69,10 @@ class History:
         return df
 
     def counterfactual_outcomes_df(self, outcome_name="outcome"):
-        dict_list = [[element[outcome_name] for element in observation.counterfactual_outcomes] for observation in self.observations]
+        dict_list = [
+            [element[outcome_name] for element in observation.counterfactual_outcomes]
+            for observation in self.observations
+        ]
         return pd.DataFrame(dict_list)
 
     def __getitem__(self, index) -> History:

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 import pandas as pd
 import seaborn as sb
@@ -19,7 +19,7 @@ class Metric(ABC):
         self.treatment_name = treatment_name
 
     @abstractmethod
-    def score(self, simulation: Simulation) -> float:
+    def score(self, simulation: Simulation) -> List[float]:
         pass
 
     def score_simulations(self, simulations: list[Simulation]):
@@ -29,7 +29,9 @@ class Metric(ABC):
                     "t": range(len(simulation.history)),
                     "score": self.score(simulation),
                     "simulation": str(simulation),
-                    "patient_id": index,
+                    "patient_id": simulation.model.patient_id,
+                    "model": str(simulation.model),
+                    "policy": str(simulation.policy),
                 }
             )
             for index, simulation in enumerate(simulations)

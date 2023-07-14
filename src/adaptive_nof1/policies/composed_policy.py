@@ -63,3 +63,11 @@ class ComposedPolicy(Policy):
 
     def available_actions(self):
         return []
+
+    def get_policy_by_name(self, name):
+        if str(self) == name:
+            return self
+        for policy in self.policies:
+            result = policy.get_policy_by_name(name)
+            if result:
+                return result

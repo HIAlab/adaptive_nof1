@@ -45,6 +45,7 @@ class ThompsonSampling(Policy):
     ):
         self.inference = inference_model
         self.posterior_update_interval = posterior_update_interval
+        self._debug_data = {"probabilities": []}
         super().__init__(**kwargs)
 
     def __str__(self):
@@ -67,7 +68,6 @@ class ThompsonSampling(Policy):
         probability_array = self.inference.approximate_max_probabilities(
             self.number_of_actions, context
         )
-        print(probability_array)
         action = (
             random.choices(range(self.number_of_actions), weights=probability_array)[0]
             + 1
@@ -75,7 +75,12 @@ class ThompsonSampling(Policy):
         self._debug_information += [
             f"Probabilities for picking: {numpy.array_str(probability_array, precision=2, suppress_small=True)}, chose {action}"
         ]
+        self._debug_data["probabilities"].append(probability_array)
         return {self.treatment_name: action}
+
+    @property
+    def debug_data(self):
+        return self._debug_data
 
 
 class ClippedThompsonSampling(ThompsonSampling):

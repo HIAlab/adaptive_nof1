@@ -24,3 +24,11 @@ class Policy(ABC):
             {self.treatment_name: action}
             for action in range(1, self.number_of_actions + 1)
         ]
+
+    @property
+    def debug_data(self) -> dict:
+        return {}
+
+    def get_policy_by_name(self, name):
+        if str(self) == name:
+            return self

@@ -4,31 +4,44 @@ from adaptive_nof1.metrics.metric import Metric
 from adaptive_nof1.simulation import Simulation
 
 from ..policies import ConstantPolicy
+from ..policies import Policy
 
 import numpy
 
 
-class RegretAgainstConstantPolicy(Metric):
-    def __init__(self, constant_action):
-        self.constant_action = constant_action
+class RegretAgainstPolicy(Metric):
+    def __init__(self, policy: Policy, **kwargs):
+        self.policy = policy
+        super().__init__(**kwargs)
 
     def score(self, simulation: Simulation):
         # Todo: Test that this is 0 if using same constant policy
-        constant_simulation = Simulation.from_model_and_policy_with_copy(
+        counterfactual_simulation = Simulation.from_model_and_policy_with_copy(
             simulation.model,
-            ConstantPolicy(
-                number_of_actions=simulation.policy.number_of_actions,
-                action=self.constant_action,
-            ),
+            self.policy,
         )
+        counterfactual_simulation.model.reset()
         for _ in range(len(simulation.history)):
-            constant_simulation.step()
+            counterfactual_simulation.step()
 
-        constant_df = constant_simulation.history.to_df()
+        counterfactual_df = counterfactual_simulation.history.to_df()
         return numpy.cumsum(
-            constant_df[self.outcome_name]
+            counterfactual_df[self.outcome_name]
             - simulation.history.to_df()[self.outcome_name]
         )
 
     def __str__(self) -> str:
-        return f"RegretAgainstConstantAction()"
+        return f"RegretAgainstPolicy{self.policy}"
+
+
+class RegretAgainstConstantPolicy(RegretAgainstPolicy):
+    def __init__(self, constant_action, **kwargs):
+        self.constant_action = constant_action
+        self.policy = ConstantPolicy(
+            action=self.constant_action,
+            number_of_actions=self.constant_action,
+        )
+        # super().__init__(**kwargs)
+
+    def __str__(self) -> str:
+        return f"RegretAgainstConstantAction({self.constant_action})"
