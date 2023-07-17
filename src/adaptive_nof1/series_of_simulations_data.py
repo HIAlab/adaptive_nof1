@@ -48,7 +48,7 @@ class SeriesOfSimulationsData:
         list_of_series: List[SeriesOfSimulations],
         metrics,
         y="simulation",
-        hue="metric",
+        hue="policy_#_metric",
         simulation_naming=lambda x: x,
     ):
         scored_df = score_df(
@@ -60,6 +60,7 @@ class SeriesOfSimulationsData:
             metrics,
             minmax_normalization=False,
         )
+        scored_df["policy_#_metric"] = scored_df["policy"] + "_#_" + scored_df["metric"]
         scored_df[y] = scored_df[y].apply(simulation_naming)
         # Select only rows at the end of the trial
         filterd_score_df = scored_df[scored_df["t"] == scored_df["t"].max()]
@@ -75,7 +76,7 @@ class SeriesOfSimulationsData:
     def plot_lines(
         list_of_series: List[SeriesOfSimulationsData],
         metrics: List[Metric],
-        hue: str = "policy_x_metric",
+        hue: str = "policy_#_metric",
         process_df=lambda x: x,
     ):
         scored_df = score_df(
@@ -87,7 +88,7 @@ class SeriesOfSimulationsData:
             metrics,
             minmax_normalization=False,
         )
-        scored_df["policy_x_metric"] = scored_df["policy"] + "#" + scored_df["metric"]
+        scored_df["policy_#_metric"] = scored_df["policy"] + "_#_" + scored_df["metric"]
         ax = seaborn.lineplot(
             data=process_df(scored_df),
             x="t",

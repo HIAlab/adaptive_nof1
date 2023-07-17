@@ -1,3 +1,4 @@
 from .series_of_simulations_runner import SeriesOfSimulationsRunner
 from .simulation_runner import SimulationRunner
 from .simulation_data import SimulationData
+from .series_of_simulations_data import SeriesOfSimulationsData
