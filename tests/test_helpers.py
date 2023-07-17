@@ -92,3 +92,8 @@ def test_index_to_actions():
         "two": 1,
         "three": 2,
     }
+
+
+def test_assert_all_equal():
+    assert all_equal(["A", "A", "A"])
+    assert not all_equal(["A", "A", "A", "B"])

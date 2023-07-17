@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from adaptive_nof1.metrics.metric import Metric
-from adaptive_nof1.simulation import Simulation
 
 from typing import List
+
+from adaptive_nof1.simulation_data import SimulationData
 
 
 class DifferenceBetweenMetric(Metric):
@@ -11,8 +12,8 @@ class DifferenceBetweenMetric(Metric):
         self.minuend = minuend
         self.subtrahend = subtrahend
 
-    def score(self, simulation: Simulation) -> List[float]:
-        return self.minuend.score(simulation) - self.subtrahend.score(simulation)
+    def score(self, data: SimulationData) -> List[float]:
+        return self.minuend.score(data) - self.subtrahend.score(data)
 
     def __str__(self) -> str:
         return f"{self.minuend} - {self.subtrahend}"

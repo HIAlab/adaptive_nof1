@@ -6,7 +6,7 @@ import numpy as np
 
 from adaptive_nof1.models.pill_model import PillModel
 from adaptive_nof1.policies.combined_policy import CombinedPolicy
-from adaptive_nof1.series_of_simulations import SeriesOfSimulations
+from adaptive_nof1.series_of_simulations_runner import SeriesOfSimulationsRunner
 from adaptive_nof1.policies.fixed_policy import FixedPolicy
 
 import pickle
@@ -17,7 +17,7 @@ NUMBER_OF_PATIENTS = 5
 
 @pytest.fixture
 def series():
-    return SeriesOfSimulations(
+    runner = SeriesOfSimulationsRunner(
         model_from_patient_id=lambda patient_id: PillModel(patient_id),
         n_patients=NUMBER_OF_PATIENTS,
         policy=CombinedPolicy(
@@ -26,8 +26,8 @@ def series():
             ],
             number_of_actions=NUMBER_OF_ACTIONS,
         ),
-        length=100,
     )
+    return runner.simulate(100)
 
 
 def test_idempotency(series):
