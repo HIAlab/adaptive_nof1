@@ -12,3 +12,11 @@ class SimulationData:
 
     def __str__(self):
         return f"SimulationData"
+
+    @property
+    def configuration(self):
+        return {
+            "policy": self.policy,
+            "model": self.model,
+            "patient_id": self.patient_id,
+        }

@@ -4,6 +4,7 @@ from .metric import *
 from .regret_against_constant_policy import (
     RegretAgainstConstantPolicy,
     RegretAgainstPolicy,
+    RegretAgainstOtherConfiguration,
 )
 from .gini_index import GiniIndex
 from .standard_deviation import StandardDeviation

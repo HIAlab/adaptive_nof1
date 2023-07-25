@@ -24,6 +24,7 @@ class Observation:
     context: Context
     treatment: Treatment
     outcome: Outcome
+    debug_data: List[dict] = field(default_factory=lambda: [])
     debug_information: str = ""
     counterfactual_outcomes: List[Outcome] = field(default_factory=lambda: [])
 
@@ -77,6 +78,9 @@ class History:
 
     def debug_information(self):
         return [observation.debug_information for observation in self.observations]
+
+    def debug_data(self):
+        return [observation.debug_data for observation in self.observations]
 
     def __getitem__(self, index) -> History:
         if isinstance(index, slice):

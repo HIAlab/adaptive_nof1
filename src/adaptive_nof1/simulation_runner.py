@@ -46,6 +46,7 @@ class SimulationRunner:
                 "outcome": outcome,
                 "counterfactual_outcomes": counterfactual_outcomes,
                 "debug_information": self.policy.debug_information[-1],
+                "debug_data": self.policy.debug_data[-1],
             }
         )
         self.history.add_observation(observation)

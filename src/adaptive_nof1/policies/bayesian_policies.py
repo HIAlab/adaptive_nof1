@@ -33,6 +33,7 @@ class UpperConfidenceBound(Policy):
         self.debug_information += [
             f"Round {len(history)}: Upper Bounds Array: {upper_bounds_array}"
         ]
+        self.debug_data.append({"upper_bounds_array": upper_bounds_array})
         return np.argmax(upper_bounds_array) + 1
 
 
@@ -45,7 +46,7 @@ class ThompsonSampling(Policy):
     ):
         self.inference = inference_model
         self.posterior_update_interval = posterior_update_interval
-        self._debug_data = {"probabilities": []}
+        self._debug_data = []
         super().__init__(**kwargs)
 
     def __str__(self):
@@ -75,7 +76,7 @@ class ThompsonSampling(Policy):
         self._debug_information += [
             f"Probabilities for picking: {numpy.array_str(probability_array, precision=2, suppress_small=True)}, chose {action}"
         ]
-        self._debug_data["probabilities"].append(probability_array)
+        self._debug_data.append({"probabilities": probability_array})
         return {self.treatment_name: action}
 
     @property

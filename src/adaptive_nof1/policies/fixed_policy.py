@@ -9,4 +9,5 @@ class FixedPolicy(Policy):
         block_length = 1 if block_length is None else block_length
         round = len(history) // block_length
         self._debug_information += ["Fixed Schedule"]
+        self._debug_data.append({})
         return {self.treatment_name: round % self.number_of_actions + 1}

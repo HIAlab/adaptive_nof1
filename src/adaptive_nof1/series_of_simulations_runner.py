@@ -42,6 +42,7 @@ class SeriesOfSimulationsRunner:
         assert all_equal([str(s.model) for s in self.simulations])
 
         self.n_patients = n_patients
+        self.model_from_patient_id = model_from_patient_id
 
     def simulate(self, length) -> SeriesOfSimulationsData:
         for _ in progressbar(range(length)):
@@ -52,6 +53,14 @@ class SeriesOfSimulationsRunner:
             simulations=[simulation.get_data() for simulation in self.simulations],
             configuration=self.configuration,
         )
+
+    def clone_with_policy(self, new_policy):
+        runner = SeriesOfSimulationsRunner(
+            model_from_patient_id=self.model_from_patient_id,
+            n_patients=self.n_patients,
+            policy=new_policy,
+        )
+        return runner
 
     @property
     def configuration(self):

@@ -10,6 +10,7 @@ class Policy(ABC):
         self.outcome_name = outcome_name
         self.treatment_name = treatment_name
         self._debug_information = []
+        self._debug_data = []
 
     @property
     def debug_information(self) -> List[str]:
@@ -26,8 +27,8 @@ class Policy(ABC):
         ]
 
     @property
-    def debug_data(self) -> dict:
-        return {}
+    def debug_data(self) -> List[dict]:
+        return self._debug_data
 
     def get_policy_by_name(self, name):
         if str(self) == name:

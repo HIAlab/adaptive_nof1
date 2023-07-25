@@ -54,3 +54,7 @@ def index_to_actions(index, dimensions, names):
 
 def all_equal(x):
     return x.count(x[0]) == len(x)
+
+
+def flatten(x):
+    return [item for row in x for item in row]

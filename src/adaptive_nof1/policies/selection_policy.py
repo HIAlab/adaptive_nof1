@@ -37,6 +37,10 @@ class SelectionPolicy(Policy):
     def debug_information(self):
         return list(zip(self._debug_information, self.policy.debug_information))
 
+    @property
+    def debug_data(self):
+        return [a | b for a, b in zip(self._debug_data, self.policy.debug_data)]
+
     def choose_action(self, history, context):
         action = self.policy.choose_action(self.transform_history(history), context)[
             self.policy.treatment_name
@@ -45,6 +49,7 @@ class SelectionPolicy(Policy):
         self._debug_information += [
             f"{self.selection_index_treatment_name()}: {selection_index}"
         ]
+        self._debug_data.append({})
         return {
             **self.index_to_actions(selection_index),
             self.selection_index_treatment_name(): selection_index,

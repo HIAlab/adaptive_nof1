@@ -51,7 +51,7 @@ class PhysicalExerciseModel(BayesianModel):
             type_intercept = pymc.Normal(
                 "type_intercept",
                 mu=0,
-                sigma=1,
+                sigma=pymc.Exponential(name="sigma", lam=1),
                 dims="type_number",
                 shape=self.dimension_for_type,
             )
