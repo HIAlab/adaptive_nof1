@@ -12,6 +12,7 @@ dependencies = [
     'tqdm',
     'panel',
     'hvplot',
+    'frozendict',
 ]
 
 [project.optional-dependencies]
