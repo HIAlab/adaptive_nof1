@@ -9,6 +9,7 @@ from adaptive_nof1.simulation_data import SimulationData
 
 import seaborn
 import pandas
+import pickle
 
 
 @dataclass

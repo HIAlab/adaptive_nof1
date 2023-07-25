@@ -5,8 +5,9 @@ from adaptive_nof1.models.model import Model
 
 
 class PillModel(Model):
-    def __init__(self, patient_id):
-        self.rng = numpy.random.default_rng(patient_id)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.rng = numpy.random.default_rng(self.patient_id)
         self.red_pill_slope = self.rng.normal(0, 1)
 
     def generate_context(self, history):
