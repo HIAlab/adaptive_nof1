@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 import pandas as pd
 import seaborn as sb
-import numpy as np
+from adaptive_nof1.basic_types import History
 
 if TYPE_CHECKING:
-    from adaptive_nof1.simulation import Simulation
+    from adaptive_nof1.simulation_data import SimulationData
 
 from sklearn.preprocessing import minmax_scale
 
@@ -19,17 +19,19 @@ class Metric(ABC):
         self.treatment_name = treatment_name
 
     @abstractmethod
-    def score(self, simulation: Simulation) -> float:
+    def score(self, data: SimulationData) -> List[float]:
         pass
 
-    def score_simulations(self, simulations: list[Simulation]):
+    def score_simulations(self, simulations: List[SimulationData]):
         df_list = [
             pd.DataFrame(
                 {
                     "t": range(len(simulation.history)),
                     "score": self.score(simulation),
                     "simulation": str(simulation),
-                    "patient_id": index,
+                    "patient_id": simulation.patient_id,
+                    "model": str(simulation.model),
+                    "policy": str(simulation.policy),
                 }
             )
             for index, simulation in enumerate(simulations)
@@ -42,7 +44,7 @@ class Metric(ABC):
         pass
 
 
-def plot_score(simulations: list[Simulation], metrics, minmax_normalization=False):
+def plot_score(simulations: list[SimulationData], metrics, minmax_normalization=False):
     sb.barplot(
         data=score_df(simulations, metrics, minmax_normalization=minmax_normalization),
         x="Score",
@@ -51,9 +53,9 @@ def plot_score(simulations: list[Simulation], metrics, minmax_normalization=Fals
     )
 
 
-def score_df(simulations: list[Simulation], metrics, minmax_normalization=False):
+def score_df(histories: list[History], metrics, minmax_normalization=False):
     df_list = []
-    scores = {str(metric): metric.score_simulations(simulations) for metric in metrics}
+    scores = {str(metric): metric.score_simulations(histories) for metric in metrics}
     for metric_name, metric_df in scores.items():
         metric_df["metric"] = metric_name
         df_list.append(metric_df)

@@ -92,4 +92,4 @@ def test_create_row_from_column_indexes_three_dimensional(three_dimensional_matr
     result = three_dimensional_matrix[:, indices].diagonal(axis1=0, axis2=1).T
     print("result\n", result)
     assert result.shape == (2, 2)
-    assert list(result) == ([[5, 6], [9, 10]])
+    assert numpy.array_equal(result, [[5, 6], [9, 10]])

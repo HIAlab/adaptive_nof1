@@ -4,9 +4,10 @@ from adaptive_nof1.models.model import Model
 
 
 class DiscretizedModel(Model):
-    def __init__(self, continuous_model, outcome_name="outcome"):
+    def __init__(self, continuous_model, outcome_name="outcome", **kwargs):
         self.continuous_model = continuous_model
         self.outcome_name = outcome_name
+        super().__init__(**kwargs)
 
     def generate_context(self, history: History):
         return self.continuous_model.generate_context(history)

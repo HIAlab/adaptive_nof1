@@ -10,4 +10,6 @@ class ConstantPolicy(Policy):
         return f"ConstantPolicy: {self.action}.\n"
 
     def choose_action(self, *_):
-        return self.action
+        self._debug_data.append({})
+        self._debug_information.append("ConstantPolicy")
+        return {self.treatment_name: self.action}

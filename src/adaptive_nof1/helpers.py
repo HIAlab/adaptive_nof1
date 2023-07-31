@@ -2,8 +2,6 @@ from typing import Dict, List
 
 seperator = "#"
 
-# TODO: Test (all)
-
 
 def merge_with_postfix(dicts: List[Dict]) -> Dict:
     merged = {}
@@ -52,3 +50,11 @@ def values_to_index(dimensions, values):
 def index_to_actions(index, dimensions, names):
     values = index_to_values(dimensions, index)
     return {name: action for name, action in zip(names, values)}
+
+
+def all_equal(x):
+    return x.count(x[0]) == len(x)
+
+
+def flatten(x):
+    return [item for row in x for item in row]

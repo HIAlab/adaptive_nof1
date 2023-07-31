@@ -5,6 +5,7 @@ from typing import List
 
 import matplotlib.pyplot as pyplot
 import itertools
+from adaptive_nof1.helpers import flatten
 
 
 class ComposedPolicy(Policy):
@@ -41,6 +42,10 @@ class ComposedPolicy(Policy):
     def debug_information(self):
         return [info for policy in self.policies for info in policy.debug_information]
 
+    @property
+    def debug_data(self):
+        return flatten([policy.debug_data for policy in self.policies])
+
     def choose_action(self, history, context):
         if len(history) > self.switch_points[
             self.current_index
@@ -63,3 +68,11 @@ class ComposedPolicy(Policy):
 
     def available_actions(self):
         return []
+
+    def get_policy_by_name(self, name):
+        if str(self) == name:
+            return self
+        for policy in self.policies:
+            result = policy.get_policy_by_name(name)
+            if result:
+                return result

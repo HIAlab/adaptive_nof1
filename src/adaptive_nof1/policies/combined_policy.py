@@ -6,6 +6,7 @@ from typing import List
 
 import matplotlib.pyplot as pyplot
 import itertools
+from adaptive_nof1.helpers import flatten
 
 
 class CombinedPolicy(Policy):
@@ -31,6 +32,10 @@ class CombinedPolicy(Policy):
     @property
     def debug_information(self):
         return list(zip(*[policy.debug_information for policy in self.policies]))
+
+    @property
+    def debug_data(self):
+        return flatten([policy.debug_data for policy in self.policies])
 
     def choose_action(self, history, context):
         if self.split_context:

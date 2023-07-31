@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 from adaptive_nof1.metrics.metric import Metric
-from adaptive_nof1.simulation import Simulation
+from adaptive_nof1.simulation_data import SimulationData
 
 import numpy
 
 
 class GiniIndex(Metric):
-    def score(self, simulation: Simulation) -> float:
-        return self.gini(simulation.history.to_df()[self.treatment_name])
+    def score(self, data: SimulationData) -> float:
+        return self.gini(data.history.to_df()[self.treatment_name])
 
     def __str__(self) -> str:
         return "Gini Index"

@@ -14,7 +14,6 @@ def get_member_as_list(list, member_name):
 
 Context = Dict[str, float]
 
-
 Treatment = Dict[str, float]
 
 Outcome = Dict[str, float]
@@ -25,6 +24,8 @@ class Observation:
     context: Context
     treatment: Treatment
     outcome: Outcome
+    debug_data: List[dict] = field(default_factory=lambda: [])
+    debug_information: str = ""
     counterfactual_outcomes: List[Outcome] = field(default_factory=lambda: [])
 
 
@@ -62,15 +63,24 @@ class History:
             }
             for observation in self.observations
         ]
-        df = pd.DataFrame(dict_list)
+        df = pd.DataFrame(dict_list).infer_objects()
 
         # Eliminate duplicate columns
         df = df.loc[:, ~df.columns.duplicated()].copy()
         return df
 
     def counterfactual_outcomes_df(self, outcome_name="outcome"):
-        dict_list = [[element[outcome_name] for element in observation.counterfactual_outcomes] for observation in self.observations]
+        dict_list = [
+            [element[outcome_name] for element in observation.counterfactual_outcomes]
+            for observation in self.observations
+        ]
         return pd.DataFrame(dict_list)
+
+    def debug_information(self):
+        return [observation.debug_information for observation in self.observations]
+
+    def debug_data(self):
+        return [observation.debug_data for observation in self.observations]
 
     def __getitem__(self, index) -> History:
         if isinstance(index, slice):
