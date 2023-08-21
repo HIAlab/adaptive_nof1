@@ -41,7 +41,9 @@ class BayesianModel:
                 df[self.treatment_name], categories=range(number_of_treatments)
             )
         )
-        sorted_treatment_dummies = treatment_dummies.reindex(sorted(treatment_dummies.columns), axis=1)
+        sorted_treatment_dummies = treatment_dummies.reindex(
+            sorted(treatment_dummies.columns), axis=1
+        )
         return pymc.floatX(sorted_treatment_dummies.to_numpy())
 
 
@@ -241,7 +243,6 @@ class BernoulliLogItInferenceModel(BayesianModel):
 
     def __str__(self):
         return f"BernoulliLogItInferenceModel"
-
 
     def update_posterior(self, history, number_of_treatments):
         df = history.to_df()

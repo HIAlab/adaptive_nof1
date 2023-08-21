@@ -57,7 +57,6 @@ class SeriesOfSimulationsRunner:
                 for simulation in self.simulations:
                     simulation.pooledHistory = pooled_history
 
-
         return SeriesOfSimulationsData(
             simulations=[simulation.get_data() for simulation in self.simulations],
             configuration=self.configuration,

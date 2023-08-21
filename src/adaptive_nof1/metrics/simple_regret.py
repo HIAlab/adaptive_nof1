@@ -14,6 +14,7 @@ class SimpleRegret(Metric):
     def __str__(self) -> str:
         return "Simple Regret"
 
+
 class MaximizingSimpleRegret(Metric):
     def score(self, data: SimulationData) -> List[float]:
         return numpy.cumsum(data.history.to_df()[self.outcome_name])

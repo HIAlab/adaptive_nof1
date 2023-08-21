@@ -65,9 +65,7 @@ class FrequentistEpsilonGreedy(Policy):
         if random.random() < self.epsilon:
             self._debug_data.append({"exploit": False})
             self._debug_information += ["Uniform Exploration"]
-            return {
-                self.treatment_name: random.choice(range(self.number_of_actions))
-            }
+            return {self.treatment_name: random.choice(range(self.number_of_actions))}
 
         self._debug_information += ["Exploit"]
         self._debug_data.append({"exploit": True})

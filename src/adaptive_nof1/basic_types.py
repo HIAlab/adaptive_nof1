@@ -40,7 +40,9 @@ class History:
     @staticmethod
     def fromListOfHistories(histories: List[History]):
         joinedHistory = History(observations=[])
-        joinedHistory.observations = flatten([history.observations for history in histories])
+        joinedHistory.observations = flatten(
+            [history.observations for history in histories]
+        )
         return joinedHistory
 
     def __len__(self):
@@ -71,7 +73,7 @@ class History:
                 **observation.treatment,
                 **observation.outcome,
                 "patient_id": observation.patient_id,
-                #"t": observation.t,
+                # "t": observation.t,
             }
             for observation in self.observations
         ]

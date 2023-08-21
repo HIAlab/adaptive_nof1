@@ -79,7 +79,7 @@ class SeriesOfSimulationsData:
         metrics: List[Metric],
         hue: str = "policy_#_metric_#_model",
         process_df=lambda x: x,
-        legend_position = None,
+        legend_position=None,
     ):
         scored_df = score_df(
             [
@@ -108,7 +108,9 @@ class SeriesOfSimulationsData:
         ax.set(xlabel="t", ylabel="Regret")
         if not legend_position:
             legend_position = (0, 1 + scored_df[hue].nunique() * 0.1)
-        seaborn.move_legend(ax, "upper left", title=None, bbox_to_anchor=legend_position)
+        seaborn.move_legend(
+            ax, "upper left", title=None, bbox_to_anchor=legend_position
+        )
         return ax
 
     def serialize(self):

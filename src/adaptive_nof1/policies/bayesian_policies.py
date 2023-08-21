@@ -62,9 +62,9 @@ class ThompsonSampling(Policy):
         probability_array = self.inference.approximate_max_probabilities(
             self.number_of_actions, context
         )
-        action = (
-            random.choices(range(self.number_of_actions), weights=probability_array)[0]
-        )
+        action = random.choices(
+            range(self.number_of_actions), weights=probability_array
+        )[0]
         self._debug_information += [
             f"Probabilities for picking: {numpy.array_str(probability_array, precision=2, suppress_small=True)}, chose {action}"
         ]
@@ -99,9 +99,9 @@ class ClippedThompsonSampling(ThompsonSampling):
             0.1,
             0.9,
         )
-        action = (
-            random.choices(range(self.number_of_actions), weights=probability_array)[0]
-        )
+        action = random.choices(
+            range(self.number_of_actions), weights=probability_array
+        )[0]
         self._debug_information += [
             f"Probabilities for picking: {numpy.array_str(probability_array, precision=2, suppress_small=True)}, chose {action}"
         ]
@@ -140,9 +140,9 @@ class ClippedHistoryAwareThompsonSampling(ThompsonSampling):
         for action in last_three_actions:
             action_index = action - 1
             probability_array[action_index] -= 0.2
-        action = (
-            random.choices(range(self.number_of_actions), weights=probability_array)[0]
-        )
+        action = random.choices(
+            range(self.number_of_actions), weights=probability_array
+        )[0]
         self._debug_information += [
             f"Probabilities for picking: {numpy.array_str(probability_array, precision=2, suppress_small=True)}, chose {action}"
         ]
