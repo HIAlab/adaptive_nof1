@@ -24,12 +24,14 @@ import matplotlib.pyplot as plt
 @dataclass
 class SeriesOfSimulationsRunner:
     simulations: List[SimulationRunner]
+    pooling: False
 
     def __init__(
         self,
         model_from_patient_id: Callable[[int], Model],
         n_patients: int,
         policy,
+        pooling=False,
     ):
         self.simulations = [
             SimulationRunner.from_model_and_policy_with_copy(
@@ -43,11 +45,18 @@ class SeriesOfSimulationsRunner:
 
         self.n_patients = n_patients
         self.model_from_patient_id = model_from_patient_id
+        self.pooling = pooling
 
     def simulate(self, length) -> SeriesOfSimulationsData:
         for _ in progressbar(range(length)):
             for simulation in self.simulations:
                 simulation.step()
+            if self.pooling:
+                histories = [simulation.history for simulation in self.simulations]
+                pooled_history = History.fromListOfHistories(histories)
+                for simulation in self.simulations:
+                    simulation.pooledHistory = pooled_history
+
 
         return SeriesOfSimulationsData(
             simulations=[simulation.get_data() for simulation in self.simulations],

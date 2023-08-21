@@ -5,9 +5,10 @@ import random
 
 
 class FrequentistExploreThenCommit(Policy):
-    def __init__(self, explore_blocks=5, **kwargs):
+    def __init__(self, explore_blocks=5, min_or_max="min", **kwargs):
         self.fixed_policy = FixedPolicy(**kwargs)
         self.explore_blocks = explore_blocks
+        self.min_or_max = min_or_max
 
         self.best_treatment = None
 
@@ -20,7 +21,10 @@ class FrequentistExploreThenCommit(Policy):
         outcome_groupby = (
             history.to_df().groupby(self.treatment_name)[self.outcome_name].mean()
         )
-        best_row = outcome_groupby.idxmax()
+        if self.min_or_max == "min":
+            best_row = outcome_groupby.idxmin()
+        if self.min_or_max == "max":
+            best_row = outcome_groupby.idxmax()
         return best_row
 
     def choose_action(self, history, _, block_length=1):
@@ -49,20 +53,20 @@ class FrequentistEpsilonGreedy(Policy):
         outcome_groupby = (
             history.to_df().groupby(self.treatment_name)[self.outcome_name].mean()
         )
-        best_row = outcome_groupby.idxmax()
+        best_row = outcome_groupby.idxmin()
         return best_row
 
     def choose_action(self, history, _, block_length=1):
         if len(history) < self.number_of_actions * block_length:
             self._debug_information += ["Initial Round"]
             self._debug_data.append({"exploit": False})
-            return {self.treatment_name: len(history) // block_length + 1}
+            return {self.treatment_name: len(history) // block_length}
 
         if random.random() < self.epsilon:
             self._debug_data.append({"exploit": False})
             self._debug_information += ["Uniform Exploration"]
             return {
-                self.treatment_name: random.choice(range(self.number_of_actions)) + 1
+                self.treatment_name: random.choice(range(self.number_of_actions))
             }
 
         self._debug_information += ["Exploit"]

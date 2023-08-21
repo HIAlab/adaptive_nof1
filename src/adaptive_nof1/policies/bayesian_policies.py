@@ -34,7 +34,7 @@ class UpperConfidenceBound(Policy):
             f"Round {len(history)}: Upper Bounds Array: {upper_bounds_array}"
         ]
         self.debug_data.append({"upper_bounds_array": upper_bounds_array})
-        return np.argmax(upper_bounds_array) + 1
+        return np.argmax(upper_bounds_array)
 
 
 class ThompsonSampling(Policy):
@@ -53,13 +53,6 @@ class ThompsonSampling(Policy):
         return f"ThompsonSampling({self.inference})"
 
     def choose_action(self, history, context, block_length=None):
-        if len(history) == 0:
-            self._debug_information += ["len(History) == 0"]
-            return {
-                self.treatment_name: random.choices(range(self.number_of_actions))[0]
-                + 1
-            }
-
         if (
             len(history) % self.posterior_update_interval == 0
             or self.inference.trace is None
@@ -71,7 +64,6 @@ class ThompsonSampling(Policy):
         )
         action = (
             random.choices(range(self.number_of_actions), weights=probability_array)[0]
-            + 1
         )
         self._debug_information += [
             f"Probabilities for picking: {numpy.array_str(probability_array, precision=2, suppress_small=True)}, chose {action}"
@@ -93,7 +85,6 @@ class ClippedThompsonSampling(ThompsonSampling):
             self._debug_information += ["len(History) == 0"]
             return {
                 self.treatment_name: random.choices(range(self.number_of_actions))[0]
-                + 1
             }
 
         if (
@@ -110,7 +101,6 @@ class ClippedThompsonSampling(ThompsonSampling):
         )
         action = (
             random.choices(range(self.number_of_actions), weights=probability_array)[0]
-            + 1
         )
         self._debug_information += [
             f"Probabilities for picking: {numpy.array_str(probability_array, precision=2, suppress_small=True)}, chose {action}"
@@ -127,7 +117,6 @@ class ClippedHistoryAwareThompsonSampling(ThompsonSampling):
             self._debug_information += ["len(History) == 0"]
             return {
                 self.treatment_name: random.choices(range(self.number_of_actions))[0]
-                + 1
             }
 
         if (
@@ -153,7 +142,6 @@ class ClippedHistoryAwareThompsonSampling(ThompsonSampling):
             probability_array[action_index] -= 0.2
         action = (
             random.choices(range(self.number_of_actions), weights=probability_array)[0]
-            + 1
         )
         self._debug_information += [
             f"Probabilities for picking: {numpy.array_str(probability_array, precision=2, suppress_small=True)}, chose {action}"

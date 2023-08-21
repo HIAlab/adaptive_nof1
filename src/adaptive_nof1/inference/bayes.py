@@ -25,7 +25,7 @@ class BayesianModel:
         data.shape = (len(df), len(self.coefficient_names))
         return data
 
-    def approximate_max_probabilities(self, number_of_treatments):
+    def approximate_max_probabilities(self, number_of_treatments, _):
         max_indices = np.ravel(
             self.trace["posterior"]["average_treatment_effect"].argmax(
                 dim="average_treatment_effect_dim_0"
@@ -33,6 +33,16 @@ class BayesianModel:
         )
         bin_counts = np.bincount(max_indices, minlength=number_of_treatments)
         return bin_counts / np.sum(bin_counts)
+
+    def data_to_treatment_matrix(self, df, number_of_treatments):
+        # Creating a Categorical Series makes get_dummies also create dummies for treatments which are not present in the dataset yet
+        treatment_dummies = pandas.get_dummies(
+            pandas.Categorical(
+                df[self.treatment_name], categories=range(number_of_treatments)
+            )
+        )
+        sorted_treatment_dummies = treatment_dummies.reindex(sorted(treatment_dummies.columns), axis=1)
+        return pymc.floatX(sorted_treatment_dummies.to_numpy())
 
 
 class GaussianAverageTreatmentEffect(BayesianModel):
@@ -232,14 +242,6 @@ class BernoulliLogItInferenceModel(BayesianModel):
     def __str__(self):
         return f"BernoulliLogItInferenceModel"
 
-    def data_to_treatment_matrix(self, df, number_of_treatments):
-        # Creating a Categorical Series makes get_dummies also create dummies for treatments which are not present in the dataset yet
-        treatment_dummies = pandas.get_dummies(
-            pandas.Categorical(
-                df[self.treatment_name] - 1, categories=range(number_of_treatments)
-            )
-        )
-        return pymc.floatX(treatment_dummies.to_numpy())
 
     def update_posterior(self, history, number_of_treatments):
         df = history.to_df()

@@ -13,6 +13,7 @@ class SimulationRunner:
     history: History
     policy: Policy
     model: Model
+    pooledHistory: None = None
 
     @staticmethod
     def from_model_and_policy_with_copy(model: Model, policy: Policy):
@@ -33,7 +34,11 @@ class SimulationRunner:
 
     def step(self):
         context = self.model.generate_context(self.history)
-        action = self.policy.choose_action(self.history, context)
+        history = self.history
+        if self.pooledHistory:
+            history = self.pooledHistory
+
+        action = self.policy.choose_action(history, context)
         outcome = self.model.observe_outcome(action, context)
         counterfactual_outcomes = [
             self.model.observe_outcome(counterfactual_action, context)
@@ -41,12 +46,14 @@ class SimulationRunner:
         ]
         observation = Observation(
             **{
+                "patient_id": self.model.patient_id,
                 "context": context,
                 "treatment": action,
                 "outcome": outcome,
                 "counterfactual_outcomes": counterfactual_outcomes,
                 "debug_information": self.policy.debug_information[-1],
                 "debug_data": self.policy.debug_data[-1],
+                "t": len(self.history),
             }
         )
         self.history.add_observation(observation)

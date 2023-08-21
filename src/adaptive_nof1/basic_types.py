@@ -7,6 +7,8 @@ import matplotlib
 import pandas as pd
 import seaborn as sb
 
+from .helpers import flatten
+
 
 def get_member_as_list(list, member_name):
     return [getattr(item, member_name) for item in list]
@@ -24,6 +26,8 @@ class Observation:
     context: Context
     treatment: Treatment
     outcome: Outcome
+    t: int
+    patient_id: int
     debug_data: List[dict] = field(default_factory=lambda: [])
     debug_information: str = ""
     counterfactual_outcomes: List[Outcome] = field(default_factory=lambda: [])
@@ -32,6 +36,12 @@ class Observation:
 @dataclass
 class History:
     observations: List[Observation]
+
+    @staticmethod
+    def fromListOfHistories(histories: List[History]):
+        joinedHistory = History(observations=[])
+        joinedHistory.observations = flatten([history.observations for history in histories])
+        return joinedHistory
 
     def __len__(self):
         return len(self.observations)
@@ -53,13 +63,15 @@ class History:
 
     def to_df(self):
         if len(self.observations) == 0:
-            return pd.DataFrame(columns=["treatment", "outcome"])
+            return pd.DataFrame(columns=["treatment", "outcome", "patient_id"])
 
         dict_list = [
             {
                 **observation.context,
                 **observation.treatment,
                 **observation.outcome,
+                "patient_id": observation.patient_id,
+                #"t": observation.t,
             }
             for observation in self.observations
         ]
