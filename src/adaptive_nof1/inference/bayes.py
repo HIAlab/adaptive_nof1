@@ -72,7 +72,7 @@ class GaussianAverageTreatmentEffect(BayesianModel):
             for treatment in treatment_dummies.columns:
                 mu += (
                     np.array(treatment_dummies[treatment])
-                    * average_treatment_effect[treatment - 1]
+                    * average_treatment_effect[treatment]
                 )
 
             outcome = pymc.Normal(
@@ -110,7 +110,7 @@ class FixedVarianceNormalEffect(BayesianModel):
             for treatment in treatment_dummies.columns:
                 mu += (
                     np.array(treatment_dummies[treatment])
-                    * average_treatment_effect[treatment - 1]
+                    * average_treatment_effect[treatment]
                 )
 
             outcome = pymc.Normal(
@@ -136,7 +136,7 @@ class LinearAdditiveInferenceModel(BayesianModel):
         # Creating a Categorical Series makes get_dummies also create dummies for treatments which are not present in the dataset yet
         treatment_dummies = pandas.get_dummies(
             pandas.Categorical(
-                df[self.treatment_name] - 1, categories=range(number_of_treatments)
+                df[self.treatment_name], categories=range(number_of_treatments)
             )
         )
         return pymc.floatX(treatment_dummies.to_numpy())
@@ -210,7 +210,7 @@ class LinearAdditiveInferenceModel(BayesianModel):
         ), "You called `approximate_max_probabilites` without updating the posterior"
 
         df = pandas.DataFrame([context] * number_of_treatments)
-        df[self.treatment_name] = range(1, number_of_treatments + 1)
+        df[self.treatment_name] = range(number_of_treatments)
 
         with self.model:
             pymc.set_data(
@@ -346,7 +346,7 @@ class BernoulliLogItInferenceModel(BayesianModel):
         ), "You called `approximate_max_probabilites` without updating the posterior"
 
         df = pandas.DataFrame([context] * number_of_treatments)
-        df[self.treatment_name] = range(1, number_of_treatments + 1)
+        df[self.treatment_name] = range(number_of_treatments)
 
         with self.model:
             pymc.set_data(

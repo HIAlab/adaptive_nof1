@@ -45,7 +45,7 @@ class SelectionPolicy(Policy):
         action = self.policy.choose_action(self.transform_history(history), context)[
             self.policy.treatment_name
         ]
-        selection_index = action - 1
+        selection_index = action
         self._debug_information += [
             f"{self.selection_index_treatment_name()}: {selection_index}"
         ]

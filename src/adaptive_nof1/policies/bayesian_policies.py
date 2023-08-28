@@ -138,7 +138,7 @@ class ClippedHistoryAwareThompsonSampling(ThompsonSampling):
 
         # Penalize using the same action
         for action in last_three_actions:
-            action_index = action - 1
+            action_index = action
             probability_array[action_index] -= 0.2
         action = random.choices(
             range(self.number_of_actions), weights=probability_array

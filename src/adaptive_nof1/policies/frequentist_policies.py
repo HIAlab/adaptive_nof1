@@ -28,7 +28,7 @@ class FrequentistExploreThenCommit(Policy):
         return best_row
 
     def choose_action(self, history, _, block_length=1):
-        if self.best_treatment:
+        if self.best_treatment is not None:
             self._debug_information += ["Commit"]
             return {self.treatment_name: self.best_treatment}
         if len(history) >= self.explore_blocks * block_length:

@@ -47,7 +47,7 @@ class ComposedPolicy(Policy):
         return flatten([policy.debug_data for policy in self.policies])
 
     def choose_action(self, history, context):
-        if len(history) > self.switch_points[
+        if context["t"] >= self.switch_points[
             self.current_index
         ] and self.current_index + 1 < len(self.policies):
             self.current_index += 1

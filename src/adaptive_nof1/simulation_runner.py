@@ -34,6 +34,7 @@ class SimulationRunner:
 
     def step(self):
         context = self.model.generate_context(self.history)
+        context["t"] = len(self.history)
         history = self.history
         if self.pooledHistory:
             history = self.pooledHistory

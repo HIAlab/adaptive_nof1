@@ -104,6 +104,7 @@ class SeriesOfSimulationsData:
             hue=hue,
             # units="patient_id",
             # estimator=None,
+            errorbar=("ci", 95),
         )
         ax.set(xlabel="t", ylabel="Regret")
         if not legend_position:

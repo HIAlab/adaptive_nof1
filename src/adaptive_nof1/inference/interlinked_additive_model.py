@@ -34,7 +34,7 @@ class InterlinkedAdditiveModel(BayesianModel):
         return "InterlinkedAdditiveModel"
 
     def data_to_treatment_indices(self, df):
-        return pymc.intX((df[self.action_names] - 1).to_numpy())
+        return pymc.intX(df[self.action_names].to_numpy())
 
     def setup_model(self):
         empty_df = pandas.DataFrame(
