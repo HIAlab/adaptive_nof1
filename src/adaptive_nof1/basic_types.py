@@ -73,7 +73,7 @@ class History:
                 **observation.treatment,
                 **observation.outcome,
                 "patient_id": observation.patient_id,
-                # "t": observation.t,
+                "t": observation.t,
             }
             for observation in self.observations
         ]

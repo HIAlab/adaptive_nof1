@@ -19,14 +19,16 @@ class Metric(ABC):
         self.treatment_name = treatment_name
 
     @abstractmethod
-    def score(self, data: SimulationData) -> List[float]:
+    def score(self, data: SimulationData) -> List[float] | float:
         pass
 
     def score_simulations(self, simulations: List[SimulationData]):
+        print(self.score(simulations[0]))
+        print(self.__str__())
         df_list = [
             pd.DataFrame(
                 {
-                    "t": range(len(simulation.history)),
+                    "t": [observation.t for observation in simulation.history.observations],
                     "score": self.score(simulation),
                     "simulation": str(simulation),
                     "patient_id": simulation.patient_id,

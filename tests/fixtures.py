@@ -2,6 +2,7 @@ import pytest
 from adaptive_nof1 import SeriesOfSimulationsRunner
 from adaptive_nof1.models.pill_model import PillModel
 from adaptive_nof1.policies import CombinedPolicy, FixedPolicy
+from adaptive_nof1.basic_types import History, Observation
 
 NUMBER_OF_ACTIONS = 5
 NUMBER_OF_PATIENTS = 5
@@ -25,3 +26,31 @@ def runner(fixed_policy):
         policy=fixed_policy,
     )
     return runner
+
+@pytest.fixture
+def simple_history():
+    return History(
+        observations=[
+            Observation(
+                context={"activity": 10},
+                treatment={"treatment": 0},
+                outcome={"outcome": 2},
+                t=0,
+                patient_id=0,
+            ),
+            Observation(
+                context={"activity": 20},
+                treatment={"treatment": 1},
+                outcome={"outcome": 3},
+                t=1,
+                patient_id=0,
+            ),
+            Observation(
+                context={"activity": 30},
+                treatment={"treatment": 2},
+                outcome={"outcome": 3},
+                t=2,
+                patient_id=0,
+            ),
+        ]
+    )

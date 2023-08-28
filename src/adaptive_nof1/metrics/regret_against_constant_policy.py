@@ -36,9 +36,17 @@ class RegretAgainstOtherConfiguration(Metric):
         counterfactual_df = self.config_to_simulation_data[
             config_to_compare_against
         ].history.to_df()
+        data_df = data.history.to_df()
+
+        merge = data_df.merge(
+            counterfactual_df,
+            how="inner",
+            validate="one_to_one",
+            on="t",
+            suffixes=(None, "_counterfactual"),
+        )
         return numpy.cumsum(
-            counterfactual_df[self.outcome_name]
-            - data.history.to_df()[self.outcome_name]
+            merge[self.outcome_name + "_counterfactual"] - merge[self.outcome_name]
         )
 
     def __str__(self) -> str:

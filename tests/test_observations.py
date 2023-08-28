@@ -11,16 +11,22 @@ def simple_history():
                 context={"activity": 10},
                 treatment={"treatment": 0},
                 outcome={"outcome": 2},
+                t=0,
+                patient_id=0,
             ),
             Observation(
                 context={"activity": 20},
                 treatment={"treatment": 1},
                 outcome={"outcome": 3},
+                t=0,
+                patient_id=0,
             ),
             Observation(
                 context={"activity": 30},
                 treatment={"treatment": 2},
                 outcome={"outcome": 3},
+                t=0,
+                patient_id=0,
             ),
         ]
     )
@@ -40,11 +46,15 @@ def test_observation_equality():
         context={"activity": 10},
         treatment={"treatment": 0},
         outcome={"outcome": 2},
+        t=0,
+        patient_id=0,
     )
     right = Observation(
         context={"activity": 10},
         treatment={"treatment": 0},
         outcome={"outcome": 2},
+        t=0,
+        patient_id=0,
     )
     assert left == right
 
@@ -54,12 +64,16 @@ def test_observation_inequality():
         context={"activity": 10},
         treatment={"treatment": 0},
         outcome={"outcome": 2},
+        t=0,
+        patient_id=0,
     )
 
     right_different_context = Observation(
         context={"activity": 9},
         treatment={"treatment": 0},
         outcome={"outcome": 2},
+        t=0,
+        patient_id=0,
     )
     assert left != right_different_context
 
@@ -67,6 +81,8 @@ def test_observation_inequality():
         context={"activity": 10},
         treatment={"treatment": 1},
         outcome={"outcome": 2},
+        t=0,
+        patient_id=0,
     )
     assert left != right_different_treatment
 
@@ -74,6 +90,8 @@ def test_observation_inequality():
         context={"activity": 10},
         treatment={"treatment": 0},
         outcome={"outcome": 3},
+        t=0,
+        patient_id=0,
     )
     assert left != right_different_outcome
 

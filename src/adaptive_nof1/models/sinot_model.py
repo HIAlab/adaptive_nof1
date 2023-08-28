@@ -55,5 +55,7 @@ class SinotModel(Model):
                 "context": context,
                 "treatment": {"treatment": action},
                 "outcome": {"outcome": -last_row["Uncertain_Low_Back_Pain"]},
+                "patient_id": self.patient_id,
+                "t": len(self.pat_complete),
             }
         )
