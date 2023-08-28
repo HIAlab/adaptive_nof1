@@ -7,5 +7,6 @@ from .regret_against_constant_policy import (
     RegretAgainstOtherConfiguration,
 )
 from .gini_index import GiniIndex
+from .entropy import Entropy
 from .standard_deviation import StandardDeviation
 from .difference_between_metric import DifferenceBetweenMetric
