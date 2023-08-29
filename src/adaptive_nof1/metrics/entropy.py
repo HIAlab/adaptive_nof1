@@ -9,7 +9,9 @@ import numpy
 
 class Entropy(Metric):
     def score(self, data: SimulationData) -> float:
-        value, counts = numpy.unique(data.history.to_df()[self.treatment_name], return_counts=True)
+        value, counts = numpy.unique(
+            data.history.to_df()[self.outcome_name], return_counts=True
+        )
         return entropy(counts)
 
     def __str__(self) -> str:

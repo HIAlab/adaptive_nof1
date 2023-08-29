@@ -23,12 +23,12 @@ class Metric(ABC):
         pass
 
     def score_simulations(self, simulations: List[SimulationData]):
-        print(self.score(simulations[0]))
-        print(self.__str__())
         df_list = [
             pd.DataFrame(
                 {
-                    "t": [observation.t for observation in simulation.history.observations],
+                    "t": [
+                        observation.t for observation in simulation.history.observations
+                    ],
                     "score": self.score(simulation),
                     "simulation": str(simulation),
                     "patient_id": simulation.patient_id,

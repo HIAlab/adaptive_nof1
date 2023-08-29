@@ -7,6 +7,7 @@ from .fixtures import simple_history
 import pytest
 from frozendict import frozendict
 
+
 # The metric should only compare the middle timepoint, since this is the only one with t == 1 present in both
 def test_matching_of_timepoints(simple_history):
     first_two = SimulationData(
@@ -26,6 +27,7 @@ def test_matching_of_timepoints(simple_history):
         config = config.copy()
         config["model"] = "LastTwo"
         return config
+
     metric = RegretAgainstOtherConfiguration(
         configuration_transform_function=switch_config,
         config_to_simulation_data={frozendict(last_two.configuration): last_two},

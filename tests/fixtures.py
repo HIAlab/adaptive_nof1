@@ -1,5 +1,6 @@
 import pytest
 from adaptive_nof1 import SeriesOfSimulationsRunner
+from adaptive_nof1 import SimulationData
 from adaptive_nof1.models.pill_model import PillModel
 from adaptive_nof1.policies import CombinedPolicy, FixedPolicy
 from adaptive_nof1.basic_types import History, Observation
@@ -27,6 +28,7 @@ def runner(fixed_policy):
     )
     return runner
 
+
 @pytest.fixture
 def simple_history():
     return History(
@@ -53,4 +55,14 @@ def simple_history():
                 patient_id=0,
             ),
         ]
+    )
+
+
+@pytest.fixture
+def simulation_data(simple_history):
+    return SimulationData(
+        history=simple_history,
+        model="Model",
+        policy="Policy",
+        patient_id=0,
     )
