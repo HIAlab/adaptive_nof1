@@ -1,3 +1,4 @@
+[![Python Tests](https://github.com/HIAlab/adaptive_nof1/actions/workflows/pytest.yml/badge.svg)](https://github.com/HIAlab/adaptive_nof1/actions/workflows/pytest.yml)
 [![Lint](https://github.com/HIAlab/adaptive_nof1/actions/workflows/lint.yml/badge.svg)](https://github.com/HIAlab/adaptive_nof1/actions/workflows/lint.yml)
 
 # Adaptive N-of-1 trials
