@@ -1,13 +1,9 @@
-from .bayes import BayesianModel
-from typing import List
-
-from adaptive_nof1.helpers import index_from_subset, index_to_actions, index_to_values
-
-import pymc
-import pandas
 import numpy
+import pandas
 import arviz
+import pymc
 
+from adaptive_nof1.inference.bayes import BayesianModel
 
 class PhysicalExerciseModel(BayesianModel):
     def __init__(
@@ -51,7 +47,7 @@ class PhysicalExerciseModel(BayesianModel):
             type_intercept = pymc.Normal(
                 "type_intercept",
                 mu=0,
-                sigma=pymc.Exponential(name="sigma", lam=1),
+                sigma=1,
                 dims="type_number",
                 shape=self.dimension_for_type,
             )
@@ -100,28 +96,25 @@ class PhysicalExerciseModel(BayesianModel):
             outcome = pymc.Normal(
                 "outcome",
                 mu=mu,
-                sigma=1,
+                sigma=pymc.Exponential(name="sigma", lam=1),
                 observed=observed_outcomes,
                 dims="obs_id",
             )
 
-    def update_posterior(self, history, _):
-        df = history.to_df()
-
-        print(df)
+    def update_posterior(self, history_df, _):
         if not self.model:
             self.setup_model()
 
         with self.model:
             pymc.set_data(
                 {
-                    "types": df["type"],
-                    "durations": df["duration"],
-                    "mean_durations": df["mean_duration"],
-                    "intensities": df["intensity"],
-                    "mean_intensities": df["mean_intensity"],
-                    "pains": df["current_pain"],
-                    "observed_outcomes": df["pain_reduction"],
+                    "types": history_df["type"],
+                    "durations": history_df["duration"],
+                    "mean_durations": history_df["mean_duration"],
+                    "intensities": history_df["intensity"],
+                    "mean_intensities": history_df["mean_intensity"],
+                    "pains": history_df["current_pain"],
+                    "observed_outcomes": history_df["pain_reduction"],
                 }
             )
             self.trace = pymc.sample(2000, progressbar=False)
