@@ -15,4 +15,4 @@ class Entropy(Metric):
         return entropy(counts)
 
     def __str__(self) -> str:
-        return f"Entropy ({self.treatment_name})"
+        return f"Entropy ({self.outcome_name})"

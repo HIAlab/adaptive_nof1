@@ -10,6 +10,7 @@ from adaptive_nof1.simulation_data import SimulationData
 import seaborn
 import pandas
 import pickle
+import numpy
 
 
 @dataclass
@@ -24,6 +25,11 @@ class SeriesOfSimulationsData:
         ax = seaborn.lineplot(data=df, x="t", y="Score", hue="Simulation")
         seaborn.move_legend(ax, "upper left", bbox_to_anchor=(1, 1))
         return df
+
+    def pooled_histories(self):
+        histories = [simulation.history for simulation in self.simulations]
+        pooled_history = History.fromListOfHistories(histories)
+        return pooled_history
 
     @staticmethod
     def score_data(
@@ -103,8 +109,8 @@ class SeriesOfSimulationsData:
             y="score",
             hue=hue,
             # units="patient_id",
-            # estimator=None,
-            errorbar=("ci", 95),
+            estimator=numpy.median,
+            errorbar=lambda x: (numpy.quantile(x, 0.25), numpy.quantile(x, 0.75)),
         )
         ax.set(xlabel="t", ylabel="Regret")
         if not legend_position:
@@ -153,11 +159,12 @@ class SeriesOfSimulationsData:
                         "counterfactual_outcomes": str(
                             observation.counterfactual_outcomes
                         ),
+                        "t": observation.t,
                     }
                 )
         df = pandas.DataFrame(data)
         return df.hvplot.heatmap(
-            x="index",
+            x="t",
             y="patient_id",
             C=treatment_name,
             hover_cols=[

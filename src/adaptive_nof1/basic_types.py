@@ -4,7 +4,7 @@ from dataclasses import dataclass, field
 from typing import List, Dict
 
 import matplotlib
-import pandas as pd
+import pandas
 import seaborn as sb
 
 from .helpers import flatten
@@ -56,7 +56,7 @@ class History:
             observation.outcome.outcome for observation in self.observations
         ]
         treatments = [observation.treatment.i for observation in self.observations]
-        df = pd.DataFrame(
+        df = pandas.DataFrame(
             data={"primary_outcomes": primary_outcomes, "treatments": treatments}
         )
         return sb.scatterplot(
@@ -65,7 +65,7 @@ class History:
 
     def to_df(self):
         if len(self.observations) == 0:
-            return pd.DataFrame(columns=["treatment", "outcome", "patient_id"])
+            return pandas.DataFrame(columns=["treatment", "outcome", "patient_id"])
 
         dict_list = [
             {
@@ -77,7 +77,7 @@ class History:
             }
             for observation in self.observations
         ]
-        df = pd.DataFrame(dict_list).infer_objects()
+        df = pandas.DataFrame(dict_list).infer_objects()
 
         # Eliminate duplicate columns
         df = df.loc[:, ~df.columns.duplicated()].copy()
@@ -88,7 +88,7 @@ class History:
             [element[outcome_name] for element in observation.counterfactual_outcomes]
             for observation in self.observations
         ]
-        return pd.DataFrame(dict_list)
+        return pandas.DataFrame(dict_list)
 
     def debug_information(self):
         return [observation.debug_information for observation in self.observations]

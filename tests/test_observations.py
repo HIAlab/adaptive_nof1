@@ -1,44 +1,7 @@
 import pytest
 
 from adaptive_nof1.basic_types import *
-
-
-@pytest.fixture
-def simple_history():
-    return History(
-        observations=[
-            Observation(
-                context={"activity": 10},
-                treatment={"treatment": 0},
-                outcome={"outcome": 2},
-                t=0,
-                patient_id=0,
-            ),
-            Observation(
-                context={"activity": 20},
-                treatment={"treatment": 1},
-                outcome={"outcome": 3},
-                t=0,
-                patient_id=0,
-            ),
-            Observation(
-                context={"activity": 30},
-                treatment={"treatment": 2},
-                outcome={"outcome": 3},
-                t=0,
-                patient_id=0,
-            ),
-        ]
-    )
-
-
-def test_history_to_df(simple_history):
-    expected_df = pd.DataFrame(
-        {"treatment": [0, 1, 2], "activity": [10, 20, 30], "outcome": [2, 3, 3]}
-    )
-    assert expected_df.reindex(sorted(expected_df.columns), axis=1).equals(
-        simple_history.to_df().reindex(sorted(expected_df.columns), axis=1)
-    )
+from .fixtures import simple_history
 
 
 def test_observation_equality():
