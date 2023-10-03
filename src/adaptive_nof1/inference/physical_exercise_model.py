@@ -5,6 +5,7 @@ import pymc
 
 from adaptive_nof1.inference.bayes import BayesianModel
 
+
 class PhysicalExerciseModel(BayesianModel):
     def __init__(
         self,

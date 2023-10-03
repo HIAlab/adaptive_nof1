@@ -1,6 +1,8 @@
 from adaptive_nof1.helpers import *
 import pytest
 
+import pandas
+
 
 def test_merge_with_postfix():
     dict_one = {"a": 1, "b": 2, "c": 3}
@@ -97,3 +99,11 @@ def test_index_to_actions():
 def test_assert_all_equal():
     assert all_equal(["A", "A", "A"])
     assert not all_equal(["A", "A", "A", "B"])
+
+
+def test_series_to_indexed_array():
+    # Missing 0, and not in the correct order
+    index = [3, 2, 1]
+    values = [3, 2, 1]
+    s = pandas.Series(values, index=index)
+    assert series_to_indexed_array(s) == [0, 1, 2, 3]
