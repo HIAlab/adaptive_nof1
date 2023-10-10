@@ -18,14 +18,6 @@ class SeriesOfSimulationsData:
     configuration: dict
     simulations: List[SimulationData]
 
-    def plot_line(self, metric, t_between=None):
-        df = score_df(self.simulations, [metric])
-        if t_between:
-            df = df[df["t"].between(t_between)]
-        ax = seaborn.lineplot(data=df, x="t", y="Score", hue="Simulation")
-        seaborn.move_legend(ax, "upper left", bbox_to_anchor=(1, 1))
-        return df
-
     def pooled_histories(self):
         histories = [simulation.history for simulation in self.simulations]
         pooled_history = History.fromListOfHistories(histories)
@@ -177,4 +169,17 @@ class SeriesOfSimulationsData:
             cmap="Category10",
             clim=(0, 8),
             grid=True,
+        )
+
+    def __getitem__(self, index) -> SeriesOfSimulationsData | SimulationData:
+        if isinstance(index, slice):
+            simulations = [
+                self.simulations[i]
+                for i in range(*index.indices(len(self.simulations)))
+            ]
+        else:
+            simulations = [self.simulations[index]]
+        return SeriesOfSimulationsData(
+            configuration=self.configuration,
+            simulations=simulations,
         )

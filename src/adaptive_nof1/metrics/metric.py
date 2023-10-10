@@ -46,6 +46,14 @@ class Metric(ABC):
         pass
 
 
+class GetValue(Metric):
+    def score(self, data: SimulationData):
+        return data.history.to_df()[self.outcome_name]
+
+    def __str__(self):
+        return f"GetValue({self.outcome_name})"
+
+
 def plot_score(simulations: list[SimulationData], metrics, minmax_normalization=False):
     sb.barplot(
         data=score_df(simulations, metrics, minmax_normalization=minmax_normalization),

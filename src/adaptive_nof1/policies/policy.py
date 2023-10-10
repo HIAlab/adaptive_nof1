@@ -22,8 +22,7 @@ class Policy(ABC):
 
     def available_actions(self):
         return [
-            {self.treatment_name: action}
-            for action in range(1, self.number_of_actions + 1)
+            {self.treatment_name: action} for action in range(self.number_of_actions)
         ]
 
     @property

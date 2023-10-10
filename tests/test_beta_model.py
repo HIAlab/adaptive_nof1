@@ -3,6 +3,7 @@ from adaptive_nof1.basic_types import History, Observation
 import pytest
 
 from .fixtures import simple_history
+from .helper_functions import outcomes_to_history
 
 from adaptive_nof1.helpers import array_almost_equal
 
@@ -41,24 +42,6 @@ def test_dataframe_n_trials_transformation_2():
 
 
 # Same tests are in the self-e app:
-def outcomes_to_history(treatments, outcomes):
-    assert len(treatments) == len(outcomes)
-    return History(
-        observations=[
-            Observation(
-                context={},
-                treatment={"treatment": treatment},
-                outcome={"outcome": outcome},
-                t=t,
-                patient_id=0,
-            )
-            for treatment, outcome, t in zip(
-                treatments, outcomes, range(len(treatments))
-            )
-        ]
-    )
-
-
 @pytest.mark.sampling
 @pytest.mark.parametrize(
     "treatments, outcomes, expected",
