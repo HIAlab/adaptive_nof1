@@ -13,13 +13,13 @@ import xarray as xr
 
 def test_dataframe_probability_transformation(simple_history):
     model = BetaModel()
-    p = model.dataframe_to_n_successes(simple_history.to_df())
+    p = model.dataframe_to_n_successes(simple_history.to_df(), number_of_treatments=3)
     assert p == [0, 1, 1]
 
 
 def test_dataframe_n_trials_transformation(simple_history):
     model = BetaModel()
-    p = model.dataframe_to_n_trials(simple_history.to_df())
+    p = model.dataframe_to_n_trials(simple_history.to_df(), number_of_treatments=3)
     assert p == [1, 1, 1]
 
 
@@ -36,7 +36,7 @@ def test_dataframe_n_trials_transformation_2():
         ]
     )
     model = BetaModel()
-    p = model.dataframe_to_n_trials(history.to_df())
+    p = model.dataframe_to_n_trials(history.to_df(), number_of_treatments=2)
     assert p == [0, 1]
 
 
@@ -77,3 +77,11 @@ def test_beta_model(treatments, outcomes, expected):
     )
     p = model.approximate_max_probabilities(number_of_treatments, {"t": len(outcomes)})
     assert array_almost_equal(list(p), expected, epsilon=0.02)
+
+
+def test_beta_model_empty_history():
+    number_of_treatments = 3
+    model = BetaModel()
+    model.update_posterior(outcomes_to_history([], []), number_of_treatments)
+    p = model.approximate_max_probabilities(number_of_treatments, {"t": 0})
+    assert array_almost_equal(list(p), [0.33, 0.33, 0.33], epsilon=0.02)

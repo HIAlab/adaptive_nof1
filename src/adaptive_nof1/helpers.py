@@ -52,8 +52,8 @@ def index_to_actions(index, dimensions, names):
     return {name: action for name, action in zip(names, values)}
 
 
-def series_to_indexed_array(series, fill_element=0):
-    array = []
+def series_to_indexed_array(series, fill_element=0, min_length=0):
+    array = [fill_element] * min_length
     for index, value in series.items():
         if index + 1 > len(array):
             array.extend([fill_element] * (index + 1 - len(array)))

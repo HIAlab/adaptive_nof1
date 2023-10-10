@@ -107,3 +107,17 @@ def test_series_to_indexed_array():
     values = [3, 2, 1]
     s = pandas.Series(values, index=index)
     assert series_to_indexed_array(s) == [0, 1, 2, 3]
+
+
+def test_series_to_indexed_array_min_length():
+    # Missing 0, and not in the correct order
+    index = [3]
+    values = [3]
+    s = pandas.Series(values, index=index)
+    assert series_to_indexed_array(s, min_length=5, fill_element=-1) == [
+        -1,
+        -1,
+        -1,
+        3,
+        -1,
+    ]

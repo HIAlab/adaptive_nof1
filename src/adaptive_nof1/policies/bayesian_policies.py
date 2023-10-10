@@ -66,7 +66,7 @@ class ThompsonSampling(Policy):
             range(self.number_of_actions), weights=probability_array
         )[0]
         self._debug_information += [
-            f"Probabilities for picking: {numpy.array_str(probability_array, precision=2, suppress_small=True)}, chose {action}"
+            f"Probabilities for picking: {numpy.array_str(numpy.array(probability_array), precision=2, suppress_small=True)}, chose {action}"
         ]
         self._debug_data.append({"probabilities": probability_array})
         return {self.treatment_name: action}

@@ -13,24 +13,29 @@ class BetaModel:
     def get_upper_confidence_bounds(self, variable_name, epsilon: float = 0.05):
         raise AssertionError("Not implemented")
 
-    def dataframe_to_n_successes(self, df):
+    def dataframe_to_n_successes(self, df, number_of_treatments):
         mean_outcome = df[self.outcome_name].mean()
         return series_to_indexed_array(
             df.groupby(self.treatment_name, group_keys=True)[self.outcome_name].apply(
                 lambda x: (x > mean_outcome).sum()
-            )
+            ),
+            min_length=number_of_treatments,
         )
 
-    def dataframe_to_n_trials(self, df):
+    def dataframe_to_n_trials(self, df, number_of_treatments):
         return series_to_indexed_array(
-            df.groupby(self.treatment_name, group_keys=True)[self.outcome_name].count()
+            df.groupby(self.treatment_name, group_keys=True)[self.outcome_name].count(),
+            min_length=number_of_treatments,
         )
 
     def update_posterior(self, history, number_of_treatments):
         df = history.to_df()
 
-        n_successes = self.dataframe_to_n_successes(df)
-        n_trials = self.dataframe_to_n_trials(df)
+        if len(df) == 0:
+            return
+
+        n_successes = self.dataframe_to_n_successes(df, number_of_treatments)
+        n_trials = self.dataframe_to_n_trials(df, number_of_treatments)
         n_failures = [b - a for a, b in zip(n_successes, n_trials)]
 
         assert len(n_successes) == number_of_treatments
@@ -46,14 +51,14 @@ class BetaModel:
                 dims="type_number",
                 shape=number_of_treatments,
             )
-            self.trace = pymc.sample(2000, progressbar=False)
+            self.trace = pymc.sample(100, progressbar=False)
 
     def __str__(self):
         return "BetaModel"
 
     def approximate_max_probabilities(self, number_of_treatments, context):
         if context["t"] == 0:
-            return [1] * number_of_treatments
+            return [1 / number_of_treatments] * number_of_treatments
         max_indices = np.ravel(
             self.trace["posterior"]["success_probabilities"].argmax(dim="type_number")
         )
