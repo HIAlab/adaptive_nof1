@@ -1,14 +1,16 @@
 from adaptive_nof1.helpers import series_to_indexed_array
-import numpy as np
+import numpy
 import pymc
 
 
 # Inspired by the Thompson Sampling implementation in the Self-E app
 class BetaModel:
-    def __init__(self, treatment_name="treatment", outcome_name="outcome"):
+    def __init__(self, treatment_name="treatment", outcome_name="outcome", seed=None):
         self.trace = None
         self.treatment_name = treatment_name
         self.outcome_name = outcome_name
+
+        self.rng = numpy.random.default_rng(seed)
 
     def get_upper_confidence_bounds(self, variable_name, epsilon: float = 0.05):
         raise AssertionError("Not implemented")
@@ -29,10 +31,13 @@ class BetaModel:
         )
 
     def update_posterior(self, history, number_of_treatments):
-        df = history.to_df()
+        self.history = history
 
-        if len(df) == 0:
-            return
+    def __str__(self):
+        return "BetaModel"
+
+    def approximate_max_probabilities(self, number_of_treatments, context):
+        df = self.history.to_df()
 
         n_successes = self.dataframe_to_n_successes(df, number_of_treatments)
         n_trials = self.dataframe_to_n_trials(df, number_of_treatments)
@@ -42,25 +47,15 @@ class BetaModel:
         assert len(n_successes) == len(n_trials)
         assert len(n_successes) == len(n_failures)
 
-        self.model = pymc.Model()
-        with self.model:
-            betas = pymc.Beta(
-                "success_probabilities",
-                alpha=[a + 1 for a in n_successes],
-                beta=[a + 1 for a in n_failures],
-                dims="type_number",
-                shape=number_of_treatments,
-            )
-            self.trace = pymc.sample(100, progressbar=False)
+        n_samples = 3000
 
-    def __str__(self):
-        return "BetaModel"
-
-    def approximate_max_probabilities(self, number_of_treatments, context):
-        if context["t"] == 0:
-            return [1 / number_of_treatments] * number_of_treatments
-        max_indices = np.ravel(
-            self.trace["posterior"]["success_probabilities"].argmax(dim="type_number")
+        samples = self.rng.beta(
+            a=[a + 1 for a in n_successes],
+            b=[b + 1 for b in n_failures],
+            size=(n_samples, number_of_treatments),
         )
-        bin_counts = np.bincount(max_indices, minlength=number_of_treatments)
-        return bin_counts / np.sum(bin_counts)
+
+        max_indices = numpy.argmax(samples, axis=1)
+
+        bin_counts = numpy.bincount(max_indices, minlength=number_of_treatments)
+        return bin_counts / numpy.sum(bin_counts)
