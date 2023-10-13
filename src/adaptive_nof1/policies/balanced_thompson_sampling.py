@@ -47,7 +47,7 @@ class BalancedThompsonSampling(Policy):
         else:
             relative_frequencies_array = [0] * self.number_of_actions
 
-        if all(relative_frequencies_array == probability_array):
+        if relative_frequencies_array == probability_array:
             action = random.choices(
                 range(self.number_of_actions), weights=probability_array
             )[0]
