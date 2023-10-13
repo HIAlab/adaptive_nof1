@@ -1,5 +1,6 @@
 import numpy
 from adaptive_nof1.models.model import Model
+from adaptive_nof1.helpers import contains_keys
 
 import scipy.stats as stats
 
@@ -11,23 +12,21 @@ class SelfExperimentationModel(Model):
         self,
         patient_id,
         intervention_effects,
-        baseline_drift=False,
-        baseline_correlation=0.9,
-        baseline_variance=1,
+        baseline_model="",
+        baseline_config={},
         correlation=0,
-        flare_probability=0,
+        spike_probability=0,
         decision_boundaries: None | List[float] = None,
         **kwargs,
     ):
         super().__init__(patient_id, **kwargs)
         self.rng = numpy.random.default_rng(self.patient_id)
-        self.baseline_drift = baseline_drift
-        self.baseline_correlation = baseline_correlation
-        self.baseline_variance = baseline_variance
+        self.baseline_model = baseline_model
+        self.baseline_config = baseline_config
 
         self.correlation = correlation
 
-        self.flare_probability = flare_probability
+        self.spike_probability = spike_probability
 
         self.decision_boundaries = decision_boundaries
         if decision_boundaries is None:
@@ -38,6 +37,15 @@ class SelfExperimentationModel(Model):
 
         self.intervention_effects = intervention_effects
 
+        if self.baseline_model == "linear":
+            assert contains_keys(self.baseline_config, ["start", "end", "min", "max"])
+        elif self.baseline_model == "random_walk":
+            assert contains_keys(
+                self.baseline_config, ["min", "max", "variance", "correlation"]
+            )
+        else:
+            raise AssertionError(f"Unknown baseline model: {self.baseline_model}")
+
     def generate_context(self, history):
         if len(history) == 0:
             return {}
@@ -47,26 +55,47 @@ class SelfExperimentationModel(Model):
             "previous_outcome": observation.outcome,
         }
 
+    def calculate_baseline(self, context, previous_outcome):
+        # Baseline
+        if self.baseline_model == "random_walk":
+            # Assumed AR(1) with mean = 0
+            baseline = self.baseline_config["correlation"] * previous_outcome[
+                "baseline"
+            ] + self.rng.normal(0, self.baseline_config["variance"])
+
+            # Bound baseline to [-1;1]
+            baseline = max(
+                self.baseline_config["min"], min(self.baseline_config["max"], baseline)
+            )
+            return baseline
+
+        if self.baseline_model == "linear":
+            t = context["t"]
+            if t < self.baseline_config["start"]:
+                return self.baseline_config["min"]
+
+            if t > self.baseline_config["end"]:
+                return self.baseline_config["max"]
+
+            slope = (self.baseline_config["max"] - self.baseline_config["min"]) / (self.baseline_config["end"] - self.baseline_config["start"])
+            return (t - self.baseline_config["start"]) * slope + self.baseline_config["min"]
+
     def observe_outcome(self, action, context):
         outcome = {}
         previous_outcome = {"continuous_outcome_before_flare": 0, "baseline": 0}
         if "previous_outcome" in context:
             previous_outcome = context["previous_outcome"]
 
-        continuous_outcome = 0
+        continuous_outcome = self.rng.normal(0, 1)
 
-        # Baseline
-        if self.baseline_drift:
-            # Assumed AR(1) with mean = 0
-            baseline = self.baseline_correlation * previous_outcome[
-                "baseline"
-            ] + self.rng.normal(0, self.baseline_variance)
-            outcome["baseline"] = baseline
-            continuous_outcome += baseline
+        baseline = self.calculate_baseline(context, previous_outcome)
+
+        outcome["baseline"] = baseline
+        continuous_outcome += baseline
 
         # Correlation
         continuous_outcome += (
-            self.correlation + previous_outcome["continuous_outcome_before_flare"]
+            self.correlation * previous_outcome["continuous_outcome_before_flare"]
         )
         outcome["continuous_outcome_before_flare"] = continuous_outcome
 
@@ -80,7 +109,7 @@ class SelfExperimentationModel(Model):
         )
 
         # Flare
-        if self.bernoulli(self.flare_probability):
+        if self.bernoulli(self.spike_probability):
             outcome["discretized_outcome"] = 1
 
         outcome["outcome"] = outcome["discretized_outcome"]
@@ -91,4 +120,4 @@ class SelfExperimentationModel(Model):
         return self.rng.choice([True, False], p=[p, 1 - p])
 
     def __str__(self):
-        return f"SelfExperimentationModel"
+        return f"SelfExperimentationModel[{self.intervention_effects}, {self.baseline_model}, {self.spike_probability}]"

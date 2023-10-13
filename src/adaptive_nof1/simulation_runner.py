@@ -60,6 +60,11 @@ class SimulationRunner:
         self.history.add_observation(observation)
         return self
 
+    def simulate(self, length) -> SimulationData:
+        for _ in range(length):
+            self.step()
+        return self.get_data()
+
     def get_data(self):
         return SimulationData(
             history=self.history,

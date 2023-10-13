@@ -1,4 +1,5 @@
 from typing import Dict, List
+import itertools
 
 seperator = "#"
 
@@ -75,3 +76,24 @@ def array_almost_equal(one, two, epsilon=0.01):
         if abs(a - b) > epsilon:
             return False
     return True
+
+
+def generate_configuration_cross_product(configuration_specification):
+    configuration_dimensions = [
+        list(range(len(item))) for item in configuration_specification.values()
+    ]
+    configuration_indices = list(itertools.product(*configuration_dimensions))
+    parameter_names = list(configuration_specification.keys())
+    parameter_value_array = list(configuration_specification.values())
+    configurations = [
+        {
+            parameter_names[index]: parameter_value_array[index][value]
+            for index, value in enumerate(configuration_index)
+        }
+        for configuration_index in configuration_indices
+    ]
+    return configurations
+
+
+def contains_keys(dict, keys):
+    return all(key in dict for key in keys)

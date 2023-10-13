@@ -76,3 +76,18 @@ class SeriesOfSimulationsRunner:
             "policy": str(self.simulations[0].policy),
             "model": str(self.simulations[0].model),
         }
+
+def simulate_configurations(configurations, length):
+    calculated_series = []
+    for configuration in configurations:
+        result = SeriesOfSimulationsRunner(**configuration).simulate(length)
+        calculated_series.append(
+            {"configuration": result.configuration, "result": result}
+        )
+
+    config_to_simulation_data = {
+        str(simulation.configuration): simulation
+        for d in calculated_series
+        for simulation in d["result"].simulations
+    }
+    return calculated_series, config_to_simulation_data
