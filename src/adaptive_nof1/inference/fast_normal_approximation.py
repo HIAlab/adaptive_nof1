@@ -1,6 +1,5 @@
 from adaptive_nof1.helpers import series_to_indexed_array
-import numpy as np
-import pymc
+import numpy
 
 import scipy.stats as stats
 
@@ -25,15 +24,22 @@ class FastNormalApproximation:
 
         df = self.history.to_df()
 
-        if len(df) == 0:
+        if len(df) < 2:
             return [0.5, 0.5]
 
         # Approximate mean and variance per treatment
         groupby = df.groupby(self.treatment_name, group_keys=True)
+
+        counts = series_to_indexed_array(groupby[self.outcome_name].count())
+        if any(numpy.array(counts) < 2):
+            return [0.5, 0.5]
+
         means = series_to_indexed_array(groupby[self.outcome_name].mean())
         stds = series_to_indexed_array(groupby[self.outcome_name].std())
+        if any(numpy.isnan(stds)):
+            stds = [1,1]
 
-        if len(means) != 2:
+        if len(means) < 2 or any(numpy.isnan(means)):
             return [0.5, 0.5]
 
         # See: https://stats.stackexchange.com/questions/50501/probability-of-one-random-variable-being-greater-than-another
@@ -41,6 +47,14 @@ class FastNormalApproximation:
         # Pr(X > Y) == Pr(X - Y > 0)
         # X - Y == N(m(X) - m(Y), V(X) + V(Y))
         mean = means[0] - means[1]
-        std = stds[0] + stds[1]
-        p = 1 - stats.norm.cdf(0, mean, std)
+
+        # Enforce a little bit of variance
+        std = max(stds[0] + stds[1], 1)
+
+        p = stats.norm.sf(0, mean, std)
+
+        if len(df) == 2 and p < 0.01:
+            import pdb; pdb.set_trace()
+        if numpy.isnan(p):
+            return [0.5, 0.5]
         return [p, 1 - p]
