@@ -77,8 +77,12 @@ class SelfExperimentationModel(Model):
             if t > self.baseline_config["end"]:
                 return self.baseline_config["max"]
 
-            slope = (self.baseline_config["max"] - self.baseline_config["min"]) / (self.baseline_config["end"] - self.baseline_config["start"])
-            return (t - self.baseline_config["start"]) * slope + self.baseline_config["min"]
+            slope = (self.baseline_config["max"] - self.baseline_config["min"]) / (
+                self.baseline_config["end"] - self.baseline_config["start"]
+            )
+            return (t - self.baseline_config["start"]) * slope + self.baseline_config[
+                "min"
+            ]
 
     def observe_outcome(self, action, context):
         outcome = {}

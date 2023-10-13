@@ -37,7 +37,7 @@ class FastNormalApproximation:
         means = series_to_indexed_array(groupby[self.outcome_name].mean())
         stds = series_to_indexed_array(groupby[self.outcome_name].std())
         if any(numpy.isnan(stds)):
-            stds = [1,1]
+            stds = [1, 1]
 
         if len(means) < 2 or any(numpy.isnan(means)):
             return [0.5, 0.5]

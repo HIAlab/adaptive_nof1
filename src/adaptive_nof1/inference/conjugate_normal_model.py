@@ -13,7 +13,7 @@ class ConjugateNormalModel:
         l=0,
         alpha=0,
         beta=0,
-        seed=None
+        seed=None,
     ):
         self.treatment_name = treatment_name
         self.outcome_name = outcome_name
@@ -76,13 +76,19 @@ class ConjugateNormalModel:
             * 2
         )
 
-    def sample_normal_inverse_gamma(self, mean, l, alpha, beta, sample_size, number_of_treatments):
+    def sample_normal_inverse_gamma(
+        self, mean, l, alpha, beta, sample_size, number_of_treatments
+    ):
         # Sample from our updated distributions
         sample_size = 1000
         invgamma.random_state = self.rng
-        sigma_squared_samples = invgamma.rvs(a=alpha, scale=beta, size=(sample_size, number_of_treatments))
+        sigma_squared_samples = invgamma.rvs(
+            a=alpha, scale=beta, size=(sample_size, number_of_treatments)
+        )
         samples = norm.rvs(
-            loc=mean, scale=numpy.sqrt(sigma_squared_samples / l), size=(sample_size, number_of_treatments)
+            loc=mean,
+            scale=numpy.sqrt(sigma_squared_samples / l),
+            size=(sample_size, number_of_treatments),
         )
         return samples
 
@@ -103,7 +109,9 @@ class ConjugateNormalModel:
             beta.append(self.beta_update(intervention))
 
         sample_size = 1000
-        samples = self.sample_normal_inverse_gamma(mean, l, alpha, beta, sample_size, number_of_treatments)
+        samples = self.sample_normal_inverse_gamma(
+            mean, l, alpha, beta, sample_size, number_of_treatments
+        )
 
         max_indices = numpy.argmax(samples, axis=1)
 

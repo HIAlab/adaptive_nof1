@@ -77,6 +77,7 @@ class SeriesOfSimulationsRunner:
             "model": str(self.simulations[0].model),
         }
 
+
 def simulate_configurations(configurations, length):
     calculated_series = []
     for configuration in configurations:
