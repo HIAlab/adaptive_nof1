@@ -34,6 +34,7 @@ class Metric(ABC):
                     "patient_id": simulation.patient_id,
                     "model": str(simulation.model),
                     "policy": str(simulation.policy),
+                    "pooled": simulation.configuration["pooled"],
                 }
             )
             for index, simulation in enumerate(simulations)

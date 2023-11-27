@@ -71,7 +71,25 @@ class SimulationRunner:
             policy=str(self.policy),
             model=str(self.model),
             patient_id=str(self.model.patient_id),
+            pooled=self.pooledHistory != None,
+            additional_config={**self.model.additional_config},
         )
 
     def __getitem__(self, index):
         return dataclasses.replace(self, history=self.history[index])
+
+
+def simulate_configurations(configurations, length):
+    calculated_series = []
+    for configuration in configurations:
+        result = SeriesOfSimulationsRunner(**configuration).simulate(length)
+        calculated_series.append(
+            {"configuration": result.configuration, "result": result}
+        )
+
+    config_to_simulation_data = {
+        str(simulation.configuration): simulation
+        for d in calculated_series
+        for simulation in d["result"].simulations
+    }
+    return calculated_series, config_to_simulation_data

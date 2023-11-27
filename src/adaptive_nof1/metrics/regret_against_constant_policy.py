@@ -26,7 +26,7 @@ class RegretAgainstOtherConfiguration(Metric):
         super().__init__(**kwargs)
 
     def score(self, data: SimulationData):
-        config_to_compare_against = frozendict(
+        config_to_compare_against = str(
             self.configuration_transform_function(data.configuration)
         )
         assert (

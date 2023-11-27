@@ -4,3 +4,4 @@ from .physical_exercise_model import PhysicalExerciseModel
 from .fast_normal_approximation import FastNormalApproximation
 from .beta_model import BetaModel
 from .conjugate_normal_model import ConjugateNormalModel
+from .sliding_model import SlidingModel

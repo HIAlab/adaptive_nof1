@@ -8,6 +8,10 @@ class Model(ABC):
         self.patient_id = patient_id
         pass
 
+    @property
+    def additional_config(self):
+        return {}
+
     @abstractmethod
     def generate_context(self, history: History) -> Context:
         pass

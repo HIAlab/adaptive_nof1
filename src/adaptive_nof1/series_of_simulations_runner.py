@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 @dataclass
 class SeriesOfSimulationsRunner:
     simulations: List[SimulationRunner]
-    pooling: False
+    pooling: bool = False
 
     def __init__(
         self,
@@ -75,6 +75,7 @@ class SeriesOfSimulationsRunner:
         return {
             "policy": str(self.simulations[0].policy),
             "model": str(self.simulations[0].model),
+            "pooling": self.pooling,
         }
 
 

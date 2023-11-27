@@ -1,3 +1,4 @@
+from joblib.externals.cloudpickle.cloudpickle_fast import _property_reduce
 import numpy
 from adaptive_nof1.models.model import Model
 from adaptive_nof1.helpers import contains_keys
@@ -43,8 +44,19 @@ class SelfExperimentationModel(Model):
             assert contains_keys(
                 self.baseline_config, ["min", "max", "variance", "correlation"]
             )
+        elif self.baseline_model == "noise":
+            assert contains_keys(self.baseline_config, ["variance"])
+        elif self.baseline_model == "":
+            self.baseline_config["name"] = ""
         else:
             raise AssertionError(f"Unknown baseline model: {self.baseline_model}")
+
+        if "name" not in self.baseline_config:
+            self.baseline_config["name"] = self.baseline_model
+
+    @property
+    def additional_config(self):
+        return {"true_intervention_effect": self.intervention_effects[1]}
 
     def generate_context(self, history):
         if len(history) == 0:
@@ -84,27 +96,32 @@ class SelfExperimentationModel(Model):
                 "min"
             ]
 
+        if self.baseline_model == "noise":
+            return self.rng.normal(0, self.baseline_config["variance"])
+
+        return 0
+
     def observe_outcome(self, action, context):
         outcome = {}
-        previous_outcome = {"continuous_outcome_before_flare": 0, "baseline": 0}
+        previous_outcome = {"continuous_outcome": 0, "baseline": 0}
         if "previous_outcome" in context:
             previous_outcome = context["previous_outcome"]
-
-        continuous_outcome = self.rng.normal(0, 1)
 
         baseline = self.calculate_baseline(context, previous_outcome)
 
         outcome["baseline"] = baseline
-        continuous_outcome += baseline
-
-        # Correlation
-        continuous_outcome += (
-            self.correlation * previous_outcome["continuous_outcome_before_flare"]
-        )
-        outcome["continuous_outcome_before_flare"] = continuous_outcome
+        continuous_outcome = baseline
 
         # Intervention Effect
         continuous_outcome += self.intervention_effects[action["treatment"]]
+
+        # Correlation
+        continuous_outcome = (
+            self.correlation * previous_outcome["continuous_outcome"]
+            + (1 - self.correlation) * continuous_outcome
+        )
+
+        outcome["continuous_outcome"] = continuous_outcome
 
         # Discretization to Ordinal values
         outcome["discretized_outcome"] = numpy.searchsorted(
@@ -124,4 +141,4 @@ class SelfExperimentationModel(Model):
         return self.rng.choice([True, False], p=[p, 1 - p])
 
     def __str__(self):
-        return f"SelfExperimentationModel[{self.intervention_effects}, {self.baseline_model}, {self.spike_probability}]"
+        return f"SEM[{self.intervention_effects}, {self.baseline_config['name']}, {self.correlation}, {self.spike_probability}]"

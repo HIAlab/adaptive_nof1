@@ -1,6 +1,6 @@
 from adaptive_nof1.basic_types import History
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -9,6 +9,8 @@ class SimulationData:
     model: str
     policy: str
     patient_id: int
+    pooled: bool = False
+    additional_config: dict = field(default_factory=dict)
 
     def __str__(self):
         return f"SimulationData"
@@ -19,4 +21,6 @@ class SimulationData:
             "policy": self.policy,
             "model": self.model,
             "patient_id": self.patient_id,
+            "pooled": self.pooled,
+            **self.additional_config,
         }

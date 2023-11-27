@@ -75,7 +75,7 @@ class SeriesOfSimulationsData:
     def plot_lines(
         list_of_series: List[SeriesOfSimulationsData],
         metrics: List[Metric],
-        hue: str = "policy_#_metric_#_model",
+        hue: str = "policy_#_metric_#_model_p",
         process_df=lambda x: x,
         legend_position=None,
     ):
@@ -88,12 +88,14 @@ class SeriesOfSimulationsData:
             metrics,
             minmax_normalization=False,
         )
-        scored_df["policy_#_metric_#_model"] = (
+        scored_df["policy_#_metric_#_model_p"] = (
             scored_df["policy"]
             + "_#_"
             + scored_df["metric"]
             + "_#_"
             + scored_df["model"]
+            + "_"
+            + scored_df["pooled"].astype(str)
         )
         ax = seaborn.lineplot(
             data=process_df(scored_df),
@@ -106,7 +108,7 @@ class SeriesOfSimulationsData:
         )
         ax.set(xlabel="t", ylabel="Regret")
         if not legend_position:
-            legend_position = (0, 1 + scored_df[hue].nunique() * 0.1)
+            legend_position = (0, 1 + 0.1)
         seaborn.move_legend(
             ax, "upper left", title=None, bbox_to_anchor=legend_position
         )
@@ -146,11 +148,11 @@ class SeriesOfSimulationsData:
                                 index
                             ]
                         ),
-                        "context": str(observation.context),
+                        "context": str(observation.context)[0:50],
                         "outcome": str(observation.outcome),
                         "counterfactual_outcomes": str(
                             observation.counterfactual_outcomes
-                        ),
+                        )[0:50],
                         "t": observation.t,
                     }
                 )

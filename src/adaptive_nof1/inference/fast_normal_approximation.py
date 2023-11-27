@@ -54,7 +54,9 @@ class FastNormalApproximation:
         p = stats.norm.sf(0, mean, std)
 
         if len(df) == 2 and p < 0.01:
-            import pdb; pdb.set_trace()
+            import pdb
+
+            pdb.set_trace()
         if numpy.isnan(p):
             return [0.5, 0.5]
         return [p, 1 - p]

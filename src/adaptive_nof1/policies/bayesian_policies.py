@@ -83,6 +83,7 @@ class ClippedThompsonSampling(ThompsonSampling):
     def choose_action(self, history, context, block_length=None):
         if len(history) == 0:
             self._debug_information += ["len(History) == 0"]
+            self._debug_data.append({})
             return {
                 self.treatment_name: random.choices(range(self.number_of_actions))[0]
             }
@@ -96,8 +97,8 @@ class ClippedThompsonSampling(ThompsonSampling):
             self.inference.approximate_max_probabilities(
                 self.number_of_actions, context
             ),
-            0.1,
-            0.9,
+            0.2,
+            0.8,
         )
         action = random.choices(
             range(self.number_of_actions), weights=probability_array
@@ -105,6 +106,7 @@ class ClippedThompsonSampling(ThompsonSampling):
         self._debug_information += [
             f"Probabilities for picking: {numpy.array_str(probability_array, precision=2, suppress_small=True)}, chose {action}"
         ]
+        self._debug_data.append({"probabilities": probability_array})
         return {self.treatment_name: action}
 
 
