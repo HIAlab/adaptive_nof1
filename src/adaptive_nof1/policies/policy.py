@@ -32,3 +32,7 @@ class Policy(ABC):
     def get_policy_by_name(self, name):
         if str(self) == name:
             return self
+
+    @property
+    def is_stopped(self) -> bool:
+        return False

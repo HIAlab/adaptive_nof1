@@ -68,7 +68,10 @@ class ThompsonSampling(Policy):
         self._debug_information += [
             f"Probabilities for picking: {numpy.array_str(numpy.array(probability_array), precision=2, suppress_small=True)}, chose {action}"
         ]
-        self._debug_data.append({"probabilities": probability_array})
+        debug_data_from_model = self.inference.debug_data()
+        self._debug_data.append(
+            {**{"probabilities": probability_array}, **debug_data_from_model}
+        )
         return {self.treatment_name: action}
 
     @property

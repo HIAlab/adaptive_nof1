@@ -14,3 +14,4 @@ from .combined_policy import CombinedPolicy
 from .crossover_policy import CrossoverPolicy
 from .selection_policy import SelectionPolicy
 from .balanced_thompson_sampling import BalancedThompsonSampling
+from .stopping_policy import StoppingPolicy

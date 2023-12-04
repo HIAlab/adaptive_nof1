@@ -148,6 +148,9 @@ class SeriesOfSimulationsData:
                                 index
                             ]
                         ),
+                        "debug_data": str(
+                            self.simulations[patient_id].history.debug_data()[index]
+                        ),
                         "context": str(observation.context)[0:50],
                         "outcome": str(observation.outcome),
                         "counterfactual_outcomes": str(
@@ -166,6 +169,7 @@ class SeriesOfSimulationsData:
                 "context",
                 "outcome",
                 "counterfactual_outcomes",
+                "debug_data",
                 treatment_name,
             ],
             cmap="Category10",

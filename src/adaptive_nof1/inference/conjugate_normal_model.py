@@ -2,6 +2,7 @@ from adaptive_nof1.helpers import series_to_indexed_array
 import numpy
 
 from scipy.stats import invgamma, norm
+import scipy
 
 
 class ConjugateNormalModel:
@@ -27,6 +28,7 @@ class ConjugateNormalModel:
         self.beta = beta
 
         self.df = None
+        self._debug_data = {"mean": mean, "l": l, "alpha": alpha, "beta": beta}
 
     def get_upper_confidence_bounds(self, variable_name, epsilon: float = 0.05):
         raise AssertionError("Not implemented")
@@ -92,6 +94,15 @@ class ConjugateNormalModel:
         )
         return samples
 
+    def posterior(self, intervention):
+        # Calculate the posterior of the normalinversegamma, which is a student-t ditribution
+        scale = (self.beta[intervention] * (self.l[intervention] + 1)) / (
+            self.l[intervention] * self.alpha[intervention]
+        )
+        return scipy.stats.t(
+            df=2 * self.alpha[intervention], loc=self.mean[intervention], scale=scale
+        )
+
     def approximate_max_probabilities(self, number_of_treatments, context):
         self.df = self.history.to_df()
 
@@ -108,6 +119,8 @@ class ConjugateNormalModel:
             alpha.append(self.alpha_update(intervention))
             beta.append(self.beta_update(intervention))
 
+        self._debug_data = {"mean": mean, "l": l, "alpha": alpha, "beta": beta}
+
         sample_size = 1000
         samples = self.sample_normal_inverse_gamma(
             mean, l, alpha, beta, sample_size, number_of_treatments
@@ -117,3 +130,6 @@ class ConjugateNormalModel:
 
         bin_counts = numpy.bincount(max_indices, minlength=number_of_treatments)
         return bin_counts / numpy.sum(bin_counts)
+
+    def debug_data(self):
+        return self._debug_data

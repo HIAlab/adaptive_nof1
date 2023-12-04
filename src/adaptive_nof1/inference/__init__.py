@@ -5,3 +5,4 @@ from .fast_normal_approximation import FastNormalApproximation
 from .beta_model import BetaModel
 from .conjugate_normal_model import ConjugateNormalModel
 from .sliding_model import SlidingModel
+from .bayesian_linear_regression import BayesianLinearRegressionModel

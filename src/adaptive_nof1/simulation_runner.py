@@ -33,6 +33,9 @@ class SimulationRunner:
         return f"SimulationRunner[{self.policy},{self.model}]"
 
     def step(self):
+        if self.policy.is_stopped:
+            return self
+
         context = self.model.generate_context(self.history)
         context["t"] = len(self.history)
         history = self.history
@@ -77,19 +80,3 @@ class SimulationRunner:
 
     def __getitem__(self, index):
         return dataclasses.replace(self, history=self.history[index])
-
-
-def simulate_configurations(configurations, length):
-    calculated_series = []
-    for configuration in configurations:
-        result = SeriesOfSimulationsRunner(**configuration).simulate(length)
-        calculated_series.append(
-            {"configuration": result.configuration, "result": result}
-        )
-
-    config_to_simulation_data = {
-        str(simulation.configuration): simulation
-        for d in calculated_series
-        for simulation in d["result"].simulations
-    }
-    return calculated_series, config_to_simulation_data
