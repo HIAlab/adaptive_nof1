@@ -5,6 +5,8 @@ import pandas as pd
 import numpy as np
 import xarray as xr
 
+from tests.mocks import MockBayesianModel
+
 from tests.helper_functions import outcomes_to_history
 
 
