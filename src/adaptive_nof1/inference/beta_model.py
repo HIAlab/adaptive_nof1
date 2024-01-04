@@ -59,3 +59,6 @@ class BetaModel:
 
         bin_counts = numpy.bincount(max_indices, minlength=number_of_treatments)
         return bin_counts / numpy.sum(bin_counts)
+
+    def debug_data(self):
+        return {}

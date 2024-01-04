@@ -1,5 +1,6 @@
 from typing import Dict, List
 import itertools
+import numpy
 
 seperator = "#"
 
@@ -69,6 +70,21 @@ def all_equal(x):
 
 def flatten(x):
     return [item for row in x for item in row]
+
+
+def flatten_dictionary(dict):
+    new_dict = {}
+    for key, value in dict.items():
+        if isinstance(value, (list, numpy.ndarray)):
+            # If the value is a list or NumPy array, iterate through its elements
+            for i, elem in enumerate(value):
+                new_key = f"{key}_{i}"
+                new_dict[new_key] = elem
+        else:
+            # For non-list or non-array values, just copy them to the new dictionary
+            new_dict[key] = value
+
+    return new_dict
 
 
 def array_almost_equal(one, two, epsilon=0.01):
