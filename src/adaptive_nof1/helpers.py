@@ -39,7 +39,7 @@ def index_to_values(dimensions, index):
 
     return values
 
-
+        
 def values_to_index(dimensions, values):
     index = 0
     for i in range(len(dimensions)):
@@ -47,6 +47,12 @@ def values_to_index(dimensions, values):
         if i < len(dimensions) - 1:
             index *= dimensions[i + 1]
     return index
+
+# Counts the number of occurences of each number an returns a list.
+# List[a] == number of occurences of a in values
+def index_to_value_counts(dimensions, index):
+    values = index_to_values(dimensions, index)
+    return list(numpy.bincount(values, minlength=max(dimensions)))
 
 
 def index_to_actions(index, dimensions, names):

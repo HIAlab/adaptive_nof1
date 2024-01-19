@@ -84,6 +84,23 @@ def test_values_to_index():
     for pair in index_value_pairs:
         assert values_to_index(dimensions, pair[1]) == pair[0]
 
+def test_index_to_value_counts():
+    dimensions = [2, 2, 4]
+    index_value_pairs = [
+        [0, [3, 0, 0, 0]],
+        [1, [2, 1, 0, 0]],
+        [2, [2, 0, 1, 0]],
+        [3, [2, 0, 0, 1]],
+        [4, [2, 1, 0, 0]],
+        [5, [1, 2, 0, 0]],
+        [6, [1, 1, 1, 0]],
+        [7, [1, 1, 0, 1]],
+        [8, [2, 1, 0, 0]],
+        [9, [1, 2, 0, 0]],
+    ]
+    for pair in index_value_pairs:
+        assert index_to_value_counts(dimensions, pair[0]) == pair[1]
+
 
 def test_index_to_actions():
     dimensions = [2, 2, 4]
