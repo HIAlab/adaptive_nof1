@@ -17,6 +17,7 @@ class SimulationRunner:
 
     @staticmethod
     def from_model_and_policy_with_copy(model: Model, policy: Policy):
+        policy.number_of_actions = model.number_of_interventions
         return SimulationRunner(
             history=History(observations=[]),
             model=copy.deepcopy(model),
@@ -38,6 +39,7 @@ class SimulationRunner:
 
         context = self.model.generate_context(self.history)
         context["t"] = len(self.history)
+        context["patient_id"] = self.model.patient_id
         history = self.history
         if self.pooledHistory:
             history = self.pooledHistory
@@ -75,7 +77,10 @@ class SimulationRunner:
             model=str(self.model),
             patient_id=str(self.model.patient_id),
             pooled=self.pooledHistory != None,
-            additional_config={**self.model.additional_config},
+            additional_config={
+                **self.model.additional_config,
+                **self.policy.additional_config,
+            },
         )
 
     def __getitem__(self, index):

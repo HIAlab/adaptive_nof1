@@ -7,34 +7,41 @@ import random
 
 
 class UpperConfidenceBound(Policy):
-    def __init__(self, number_of_actions: int, epsilon: float):
+    def __init__(self, epsilon: float, inference_model, **kwargs):
         self.epsilon = epsilon
-        self.inference = GaussianAverageTreatmentEffect(
-            treatment_name=self.treatment_name
-        )
-        super().__init__(number_of_actions)
+        self.inference = inference_model
+        super().__init__(**kwargs)
 
     def __str__(self):
-        return f"UpperConfidenceBound: {self.epsilon} epsilon"
+        return f"UpperConfidenceBound({self.epsilon} epsilon, {self.inference})"
 
     def choose_best_action(self, history):
         outcome_groupby = history.to_df().groupby(self.treatment_name)["outcome"].mean()
         best_row = outcome_groupby.idxmin()
         return best_row
 
-    def choose_action(self, history, _, block_length):
+    @property
+    def additional_config(self):
+        return {"inference": f"{self.inference}"}
+
+    def choose_action(self, history, context):
         self.inference.update_posterior(history, self.number_of_actions)
-        bounds = (
-            self.inference.get_upper_confidence_bounds("average_treatment_effect")
-            .get("average_treatment_effect")
-            .data
+        self.inference.approximate_max_probabilities(self.number_of_actions, context)
+        upper_bounds_array = self.inference.get_upper_confidence_bounds(
+            self.outcome_name
         )
-        upper_bounds_array = [bound[1] for bound in bounds]
-        self.debug_information += [
-            f"Round {len(history)}: Upper Bounds Array: {upper_bounds_array}"
-        ]
-        self.debug_data.append({"upper_bounds_array": upper_bounds_array})
-        return np.argmax(upper_bounds_array)
+        self.debug_data.append(
+            {"upper_bounds_array": upper_bounds_array, **self.inference.debug_data}
+        )
+
+        if context["t"] == 0:
+            self._debug_information += ["First Action"]
+            return {
+                self.treatment_name: random.choices(range(self.number_of_actions))[0]
+            }
+        # Todo: make debug data work without this call
+        self._debug_information += [""]
+        return {self.treatment_name: numpy.argmax(upper_bounds_array)}
 
 
 class ThompsonSampling(Policy):
@@ -49,10 +56,14 @@ class ThompsonSampling(Policy):
         self._debug_data = []
         super().__init__(**kwargs)
 
+    @property
+    def additional_config(self):
+        return {"inference": f"{self.inference}"}
+
     def __str__(self):
         return f"ThompsonSampling({self.inference})"
 
-    def choose_action(self, history, context, block_length=None):
+    def choose_action(self, history, context):
         if (
             len(history) % self.posterior_update_interval == 0
             or self.inference.trace is None
@@ -68,7 +79,7 @@ class ThompsonSampling(Policy):
         self._debug_information += [
             f"Probabilities for picking: {numpy.array_str(numpy.array(probability_array), precision=2, suppress_small=True)}, chose {action}"
         ]
-        debug_data_from_model = self.inference.debug_data()
+        debug_data_from_model = self.inference.debug_data
         self._debug_data.append(
             {**{"probabilities": probability_array}, **debug_data_from_model}
         )
@@ -83,7 +94,7 @@ class ClippedThompsonSampling(ThompsonSampling):
     def __str__(self):
         return f"ClippedThompsonSampling({self.inference})"
 
-    def choose_action(self, history, context, block_length=None):
+    def choose_action(self, history, context):
         if len(history) == 0:
             self._debug_information += ["len(History) == 0"]
             self._debug_data.append({})

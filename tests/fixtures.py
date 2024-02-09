@@ -39,6 +39,7 @@ def simple_history():
                 outcome={"outcome": 2},
                 t=0,
                 patient_id=0,
+                debug_data={"means": [2, 0, 0]},
             ),
             Observation(
                 context={"activity": 20},
@@ -46,6 +47,7 @@ def simple_history():
                 outcome={"outcome": 3},
                 t=1,
                 patient_id=0,
+                debug_data={"means": [2, 3, 0]},
             ),
             Observation(
                 context={"activity": 30},
@@ -53,6 +55,7 @@ def simple_history():
                 outcome={"outcome": 3},
                 t=2,
                 patient_id=0,
+                debug_data={"means": [2, 3, 3]},
             ),
         ]
     )
@@ -65,4 +68,5 @@ def simulation_data(simple_history):
         model="Model",
         policy="Policy",
         patient_id=0,
+        additional_config={"expectations_of_interventions": [1, 2, 3]},
     )

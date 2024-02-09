@@ -84,6 +84,7 @@ def test_values_to_index():
     for pair in index_value_pairs:
         assert values_to_index(dimensions, pair[1]) == pair[0]
 
+
 def test_index_to_value_counts():
     dimensions = [2, 2, 4]
     index_value_pairs = [

@@ -4,7 +4,6 @@ from adaptive_nof1.metrics.metric import Metric
 from adaptive_nof1.models.model import Model
 from adaptive_nof1.simulation_data import SimulationData
 from adaptive_nof1.simulation_runner import SimulationRunner
-from frozendict import frozendict
 
 from ..policies import ConstantPolicy
 from ..policies import Policy

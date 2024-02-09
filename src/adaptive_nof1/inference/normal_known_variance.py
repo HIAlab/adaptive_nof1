@@ -1,3 +1,4 @@
+from numpy.core.fromnumeric import mean
 from adaptive_nof1.helpers import series_to_indexed_array
 import numpy
 
@@ -25,18 +26,33 @@ class NormalKnownVariance:
         self.prior_mean = prior_mean
         self.prior_variance = prior_variance
         self.variance = variance
+        self.number_of_interventions = None
 
         self.df = None
         self._debug_data = {"mean": prior_mean, "variance": prior_variance}
 
     def get_upper_confidence_bounds(self, variable_name, epsilon: float = 0.05):
-        raise AssertionError("Not implemented")
+        assert variable_name == self.outcome_name, "Only outcome variable supported"
+        assert (
+            self.number_of_interventions is not None
+        ), "Do not call get_upper_confidence_bounds without previously calling update_posterior"
+        mean, variance = self.posterior_parameters(self.number_of_interventions)
+        upper_confidence_bounds = norm.ppf(
+            1 - epsilon,
+            loc=mean,
+            scale=numpy.array(variance) + self.variance,
+        )
+        return upper_confidence_bounds
 
     def update_posterior(self, history, number_of_treatments):
+        self.number_of_interventions = number_of_treatments
         self.history = history
+        self.df = self.history.to_df()
+        mean, variance = self.posterior_parameters(number_of_treatments)
+        self._debug_data = {"mean": mean, "variance": variance}
 
     def __str__(self):
-        return f"NormalKnownVariance({self.mean}, {self.variance})"
+        return f"NormalKnownVariance({self.prior_mean}, {self.prior_variance}, {self.variance})"
 
     def n(self, intervention):
         return len(self.series(intervention))
@@ -64,8 +80,6 @@ class NormalKnownVariance:
         self, mean, variance, sample_size, number_of_treatments
     ):
         # Sample from our updated distributions
-        sample_size = 10000
-        invgamma.random_state = self.rng
         samples = norm.rvs(
             loc=mean,
             scale=numpy.array(variance) + self.variance,
@@ -76,14 +90,10 @@ class NormalKnownVariance:
     def multivariate_normal_distribution(self):
         mean = self._debug_data["mean"]
         variance = self._debug_data["variance"]
-        cov = torch.eye(len(mean)).fill_diagonal(variance)
+        cov = torch.diag_embed(torch.tensor(variance))
         return torch.distributions.MultivariateNormal(torch.tensor(mean), cov)
 
-    def approximate_max_probabilities(self, number_of_treatments, context):
-        self.df = self.history.to_df()
-
-        # calculate posterior parameters:
-        # See https://en.wikipedia.org/wiki/Conjugate_prior and then Normal with known variance
+    def posterior_parameters(self, number_of_treatments):
         mean = []
         variance = []
 
@@ -91,10 +101,26 @@ class NormalKnownVariance:
             mean.append(self.mean_update(intervention))
             variance.append(self.variance_update(intervention))
 
+        return mean, variance
+
+    def sample_posterior_means(self, mean, variance, sample_size, number_of_treatments):
+        samples = norm.rvs(
+            loc=mean,
+            scale=numpy.array(variance),
+            size=(sample_size, number_of_treatments),
+        )
+        return samples
+
+    # This calculates the probability from our model that each treatment is the best by sampling from the mean values
+    def approximate_max_probabilities(self, number_of_treatments, context):
+        # calculate posterior parameters:
+        # See https://en.wikipedia.org/wiki/Conjugate_prior and then Normal with known variance
+
+        mean, variance = self.posterior_parameters(number_of_treatments)
         self._debug_data = {"mean": mean, "variance": variance}
 
         sample_size = 1000
-        samples = self.sample_posterior_predictive(
+        samples = self.sample_posterior_means(
             mean, variance, sample_size, number_of_treatments
         )
 

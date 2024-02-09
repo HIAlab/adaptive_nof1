@@ -7,10 +7,12 @@ from adaptive_nof1.metrics import score_df
 from adaptive_nof1.metrics.metric import Metric
 from adaptive_nof1.simulation_data import SimulationData
 
+import holoviews
 import seaborn
 import pandas
 import pickle
 import numpy
+import bokeh
 
 
 @dataclass
@@ -103,8 +105,8 @@ class SeriesOfSimulationsData:
             y="score",
             hue=hue,
             # units="patient_id",
-            estimator=numpy.median,
-            errorbar=lambda x: (numpy.quantile(x, 0.25), numpy.quantile(x, 0.75)),
+            # estimator=numpy.median,
+            # errorbar=lambda x: (numpy.quantile(x, 0.25), numpy.quantile(x, 0.75)),
         )
         ax.set(xlabel="t", ylabel="Regret")
         if not legend_position:
@@ -132,7 +134,41 @@ class SeriesOfSimulationsData:
             object = pickle.load(file)
         return object
 
-    def plot_allocations(self, treatment_name="treatment"):
+    def draw_legend(self, min, max):
+        colormap = holoviews.Palette("Category10", samples=10).values
+        legend_items = []
+        width = 2
+        height = 2
+        for treatment in range(min, max):
+            x = 0
+            y = (treatment - min) * height
+            xx = width
+            yy = y + height
+            rect = holoviews.Rectangles(
+                [(x, y, xx, yy, colormap[treatment - min])], vdims="value"
+            )
+            rect.opts(color="value")
+            label = holoviews.Text(
+                width + 0.9,
+                (treatment - min + 0.5) * height,
+                f"{treatment}",
+                halign="center",
+                valign="center",
+            )
+            legend_items.append(rect * label)
+
+        return holoviews.Overlay(legend_items).opts(
+            xaxis=None,
+            yaxis=None,
+            width=200,
+            height=200,
+            show_frame=False,
+            toolbar=None,
+            xlim=(-0.2, 10),
+            ylim=(0, (max - min) * height + 5),
+        )
+
+    def plot_allocations(self, treatment_name="treatment", offset=1):
         data = []
         for patient_id in range(len(self.simulations)):
             patient_history = self.simulations[patient_id].history
@@ -140,9 +176,10 @@ class SeriesOfSimulationsData:
                 observation = patient_history.observations[index]
                 data.append(
                     {
-                        "patient_id": patient_id,
-                        "index": index,
-                        **observation.treatment,
+                        "i": patient_id + offset,
+                        "index": index + offset,
+                        treatment_name: observation.treatment[treatment_name] + offset,
+                        "color_index": observation.treatment[treatment_name],
                         "debug_info": str(
                             self.simulations[patient_id].history.debug_information()[
                                 index
@@ -156,14 +193,15 @@ class SeriesOfSimulationsData:
                         "counterfactual_outcomes": str(
                             observation.counterfactual_outcomes
                         )[0:50],
-                        "t": observation.t,
+                        "j": observation.t + 1,
                     }
                 )
+
         df = pandas.DataFrame(data)
-        return df.hvplot.heatmap(
-            x="t",
-            y="patient_id",
-            C=treatment_name,
+        plot = df.hvplot.heatmap(
+            x="j",
+            y="i",
+            C="color_index",
             hover_cols=[
                 "debug_info",
                 "context",
@@ -173,9 +211,11 @@ class SeriesOfSimulationsData:
                 treatment_name,
             ],
             cmap="Category10",
-            clim=(0, 8),
+            clim=(0, 9),
             grid=True,
+            colorbar=False,
         )
+        return plot
 
     def __getitem__(self, index) -> SeriesOfSimulationsData | SimulationData:
         if isinstance(index, slice):
@@ -189,3 +229,21 @@ class SeriesOfSimulationsData:
             configuration=self.configuration,
             simulations=simulations,
         )
+
+
+def plot_allocations_for_calculated_series(calculated_series):
+    panels = []
+    for series in calculated_series:
+        min, max = (
+            series["result"].pooled_histories().to_df()["treatment"].agg(["min", "max"])
+        )
+        panels.append(
+            series["result"].plot_allocations()
+            + series["result"].draw_legend(min + 1, max + 2)
+        )
+    for panel, i in zip(panels, range(len(panels))):
+        panel.opts(
+            title=f"{calculated_series[i]['configuration']['policy']}, {calculated_series[i]['configuration']['model']}",
+            fontsize={"title": "80%"},
+        )
+    return holoviews.Layout(panels).cols(2)

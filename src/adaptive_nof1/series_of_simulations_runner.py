@@ -40,8 +40,12 @@ class SeriesOfSimulationsRunner:
             )
             for index in range(n_patients)
         ]
-        assert all_equal([str(s.policy) for s in self.simulations])
-        assert all_equal([str(s.model) for s in self.simulations])
+        assert all_equal(
+            [str(s.policy) for s in self.simulations]
+        ), "Not all policies are the same. Usually, you need to set __str__() somewhere"
+        assert all_equal(
+            [str(s.model) for s in self.simulations]
+        ), "Not all models are the same. Usually, you need to set __str__() somewhere"
 
         self.n_patients = n_patients
         self.model_from_patient_id = model_from_patient_id

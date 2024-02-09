@@ -14,11 +14,16 @@ class BayesianModel:
         self.trace = None
         self.treatment_name = treatment_name
         self.outcome_name = outcome_name
+        self._debug_data = {}
 
     def get_upper_confidence_bounds(self, variable_name, epsilon: float = 0.05):
-        return arviz.hdi(
-            self.trace.posterior, var_names=[variable_name], hdi_prob=1 - epsilon
+        confidence_bounds = arviz.hdi(
+            self.trace.posterior_predictive,
+            var_names=[variable_name],
+            hdi_prob=1 - epsilon,
         )
+        # The data containts always (lower, upper), and we only want higher
+        return confidence_bounds[variable_name][:, 1].to_numpy()
 
     def data_to_coefficient_matrix(self, df):
         data = df[self.coefficient_names].to_numpy()
@@ -45,6 +50,10 @@ class BayesianModel:
             sorted(treatment_dummies.columns), axis=1
         )
         return pymc.floatX(sorted_treatment_dummies.to_numpy())
+
+    @property
+    def debug_data(self):
+        return self._debug_data
 
 
 class GaussianAverageTreatmentEffect(BayesianModel):

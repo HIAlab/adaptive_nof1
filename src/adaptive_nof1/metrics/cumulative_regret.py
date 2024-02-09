@@ -12,7 +12,7 @@ class CumulativeRegret(Metric):
         return numpy.cumsum(-data.history.to_df()[self.outcome_name])
 
     def __str__(self) -> str:
-        return "Cumulative Regret"
+        return f"Cumulative Regret ({self.outcome_name})"
 
 
 class MaximizingCumulativeRegret(Metric):
@@ -20,7 +20,7 @@ class MaximizingCumulativeRegret(Metric):
         return numpy.cumsum(data.history.to_df()[self.outcome_name])
 
     def __str__(self) -> str:
-        return "Maximizing Cumulative Regret"
+        return f"Maximizing Cumulative Regret ({self.outcome_name})"
 
 
 class BestCaseCumulativeRegret(Metric):
