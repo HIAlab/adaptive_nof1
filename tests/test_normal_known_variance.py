@@ -15,7 +15,7 @@ from .helper_functions import outcomes_to_history
     [
         ([0, 0, 0, 0], [1, 1, -1, -1], [0.5, 0.5]),
         ([0, 0, 1, 1], [-1, 1, 2, -2], [0.50, 0.50]),
-        ([0, 0, 1, 1], [-1, -2, -2, -3], [0.64, 0.36]),
+        ([0, 0, 0, 0, 0, 1, 1, 1, 1, 1], [1.02843959,  3.35494956,  1.95655613,  1.50242135, -0.46956782, -0.66010774,  1.07235382,  1.28096369,  0.23741603,  1.05000223], [ 0.8969, 1-0.8969]), # Values calculated with PyMC
     ],
 )
 def test_normal_known_variance_max_probabilities(treatments, outcomes, expected):
@@ -35,9 +35,7 @@ def test_normal_known_variance_max_probabilities(treatments, outcomes, expected)
 @pytest.mark.parametrize(
     "treatments, outcomes, expected",
     [
-        ([0, 0, 0, 0], [1, 1, -1, -1], [1.97, 3.3]),
-        ([0, 0, 1, 1], [-1, 1, 2, -2], [2.2, 2.2]),
-        ([0, 0, 1, 1], [-1, -2, -2, -3], [1.19, 0.52]),
+        ([0, 0, 0, 0, 0, 1, 1, 1, 1, 1], [1.02843959,  3.35494956,  1.95655613,  1.50242135, -0.46956782, -0.66010774,  1.07235382,  1.28096369,  0.23741603,  1.05000223], [2.0, 1.3]), # Values calculated with PyMC
     ],
 )
 def test_normal_known_variance_upper_confidence_bounds(treatments, outcomes, expected):
@@ -50,5 +48,5 @@ def test_normal_known_variance_upper_confidence_bounds(treatments, outcomes, exp
     model.update_posterior(
         outcomes_to_history(treatments, outcomes), number_of_treatments
     )
-    p = model.get_upper_confidence_bounds(number_of_treatments)
+    p = model.get_upper_confidence_bounds("outcome", epsilon=0.03)
     assert array_almost_equal(p, expected, epsilon=0.02)

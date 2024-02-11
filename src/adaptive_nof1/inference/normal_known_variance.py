@@ -40,7 +40,7 @@ class NormalKnownVariance:
         upper_confidence_bounds = norm.ppf(
             1 - epsilon,
             loc=mean,
-            scale=numpy.array(variance) + self.variance,
+            scale=numpy.sqrt(numpy.array(variance) + self.variance),
         )
         return upper_confidence_bounds
 
@@ -82,7 +82,7 @@ class NormalKnownVariance:
         # Sample from our updated distributions
         samples = norm.rvs(
             loc=mean,
-            scale=numpy.array(variance) + self.variance,
+            scale=numpy.sqrt(numpy.array(variance) + self.variance),
             size=(sample_size, number_of_treatments),
         )
         return samples
@@ -90,7 +90,7 @@ class NormalKnownVariance:
     def multivariate_normal_distribution(self):
         mean = self._debug_data["mean"]
         variance = self._debug_data["variance"]
-        cov = torch.diag_embed(torch.tensor(variance))
+        cov = torch.diag_embed(torch.tensor(numpy.sqrt(variance)))
         return torch.distributions.MultivariateNormal(torch.tensor(mean), cov)
 
     def posterior_parameters(self, number_of_treatments):
@@ -106,7 +106,7 @@ class NormalKnownVariance:
     def sample_posterior_means(self, mean, variance, sample_size, number_of_treatments):
         samples = norm.rvs(
             loc=mean,
-            scale=numpy.array(variance),
+            scale=numpy.sqrt(numpy.array(variance)),
             size=(sample_size, number_of_treatments),
         )
         return samples
@@ -119,7 +119,7 @@ class NormalKnownVariance:
         mean, variance = self.posterior_parameters(number_of_treatments)
         self._debug_data = {"mean": mean, "variance": variance}
 
-        sample_size = 1000
+        sample_size = 5000
         samples = self.sample_posterior_means(
             mean, variance, sample_size, number_of_treatments
         )
