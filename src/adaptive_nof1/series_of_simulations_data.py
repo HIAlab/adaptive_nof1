@@ -99,16 +99,17 @@ class SeriesOfSimulationsData:
             + "_"
             + scored_df["pooled"].astype(str)
         )
+        scored_df["j"] = scored_df["t"] + 1
         ax = seaborn.lineplot(
             data=process_df(scored_df),
-            x="t",
+            x="j",
             y="score",
             hue=hue,
             # units="patient_id",
             # estimator=numpy.median,
             # errorbar=lambda x: (numpy.quantile(x, 0.25), numpy.quantile(x, 0.75)),
         )
-        ax.set(xlabel="t", ylabel="Regret")
+        ax.set(xlabel="$j$", ylabel="Regret")
         if not legend_position:
             legend_position = (0, 1 + 0.1)
         seaborn.move_legend(
@@ -214,6 +215,7 @@ class SeriesOfSimulationsData:
             clim=(0, 9),
             grid=True,
             colorbar=False,
+            height=800,
         )
         return plot
 
