@@ -13,12 +13,11 @@ class CombinedPolicy(Policy):
     def __init__(
         self,
         policies: List[Policy],
-        number_of_actions=None,
         split_context=False,
         update_context_with_actions=True,
         treatment_names: List[str] | None = None,
     ):
-        super().__init__(number_of_actions=number_of_actions)
+        super().__init__()
         self.policies = policies
         if treatment_names:
             for name, policy in zip(treatment_names, policies):
@@ -28,6 +27,15 @@ class CombinedPolicy(Policy):
 
     def __str__(self):
         return f"CombinedPolicy({[str(policy) for policy in self.policies]})"
+
+    @property
+    def number_of_actions(self):
+        return [policy.number_of_actions for policy in self.policies]
+
+    @number_of_actions.setter
+    def number_of_actions(self, values):
+        for policy, value in zip(self.policies, values):
+            policy.number_of_actions = value
 
     @property
     def debug_information(self):

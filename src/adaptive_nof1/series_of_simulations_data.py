@@ -110,11 +110,16 @@ class SeriesOfSimulationsData:
             # errorbar=lambda x: (numpy.quantile(x, 0.25), numpy.quantile(x, 0.75)),
         )
         ax.set(xlabel="$j$", ylabel="Regret")
-        if not legend_position:
-            legend_position = (0, 1 + 0.1)
-        seaborn.move_legend(
-            ax, "upper left", title=None, bbox_to_anchor=legend_position
-        )
+        if legend_position:
+            seaborn.move_legend(
+                ax, "upper left", title=None, bbox_to_anchor=legend_position
+            )
+        else:
+            seaborn.move_legend(
+                ax,
+                "best",
+                title=None,
+            )
         return ax
 
     def serialize(self):
@@ -215,7 +220,7 @@ class SeriesOfSimulationsData:
             clim=(0, 9),
             grid=True,
             colorbar=False,
-            height=800,
+            height=500,
         )
         return plot
 

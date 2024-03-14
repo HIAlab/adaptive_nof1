@@ -2,7 +2,7 @@ import pytest
 from adaptive_nof1 import SeriesOfSimulationsRunner
 from adaptive_nof1 import SimulationData
 from adaptive_nof1.models.pill_model import PillModel
-from adaptive_nof1.policies import CombinedPolicy, FixedPolicy
+from adaptive_nof1.policies import FixedPolicy
 from adaptive_nof1.basic_types import History, Observation
 
 NUMBER_OF_ACTIONS = 5
@@ -11,12 +11,7 @@ NUMBER_OF_PATIENTS = 5
 
 @pytest.fixture
 def fixed_policy():
-    return CombinedPolicy(
-        [
-            FixedPolicy(number_of_actions=NUMBER_OF_ACTIONS),
-        ],
-        number_of_actions=NUMBER_OF_ACTIONS,
-    )
+    return FixedPolicy()
 
 
 @pytest.fixture
