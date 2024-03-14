@@ -13,6 +13,8 @@ dependencies = [
     'panel',
     'hvplot',
     'frozendict',
+    'jsonpickle',
+    'torch',
 ]
 
 [project.optional-dependencies]
@@ -20,6 +22,9 @@ dev = [
     'pytest',
     'nbmake',
     'black',
+]
+r = [
+    'rpy2',
 ]
 
 [build-system]

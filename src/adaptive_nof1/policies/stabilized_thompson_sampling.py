@@ -44,7 +44,9 @@ class StabilizedThompsonSampling(Policy):
         ):
             self.inference.update_posterior(history, self.number_of_actions)
 
-        assert block_length == None, "Currently not implemented to work with stabilizing"
+        assert (
+            block_length == None
+        ), "Currently not implemented to work with stabilizing"
 
         probability_array = self.probability_array(context)
 

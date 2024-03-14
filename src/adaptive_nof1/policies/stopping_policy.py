@@ -20,16 +20,25 @@ class StoppingPolicy(Policy):
         return self.policy.debug_information
 
     @override
-    def choose_action(self, history, context, block_length=1):
+    def choose_action(self, history, context):
         self._is_stopped = self.stopping_time(history, context)
-        return self.policy.choose_action(history, context, block_length)
+        self._debug_data += [{"is_stopped": self._is_stopped}]
+        return self.policy.choose_action(history, context)
 
     def available_actions(self):
         return self.policy.available_actions()
 
+    @Policy.number_of_actions.setter
+    def number_of_actions(self, value):
+        self.policy.number_of_actions = value
+
+    @property
+    def additional_config(self):
+        return self.policy.additional_config
+
     @property
     def debug_data(self) -> List[dict]:
-        return self.policy.debug_data
+        return [{**a, **b} for a, b in zip(self.policy.debug_data, self._debug_data)]
 
     def get_policy_by_name(self, name):
         if str(self) == name:

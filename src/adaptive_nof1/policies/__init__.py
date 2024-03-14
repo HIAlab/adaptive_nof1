@@ -4,6 +4,7 @@ from .bayesian_policies import (
     ClippedThompsonSampling,
     ClippedHistoryAwareThompsonSampling,
 )
+from .explore_then_commit import ExploreThenCommit
 from .block_policy import BlockPolicy
 from .constant_policy import ConstantPolicy
 from .fixed_policy import FixedPolicy
@@ -15,3 +16,5 @@ from .crossover_policy import CrossoverPolicy
 from .selection_policy import SelectionPolicy
 from .balanced_thompson_sampling import BalancedThompsonSampling
 from .stopping_policy import StoppingPolicy
+from .fixed_indexed_policy import FixedIndexedPolicy
+from .sequential_halving import SequentialHalving

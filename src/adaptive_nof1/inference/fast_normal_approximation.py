@@ -8,6 +8,7 @@ class FastNormalApproximation:
     def __init__(self, treatment_name="treatment", outcome_name="outcome"):
         self.treatment_name = treatment_name
         self.outcome_name = outcome_name
+        self._debug_data = {}
 
     def get_upper_confidence_bounds(self, variable_name, epsilon: float = 0.05):
         raise AssertionError("Not implemented")
@@ -17,6 +18,10 @@ class FastNormalApproximation:
 
     def __str__(self):
         return "FastNormalApproximation"
+
+    @property
+    def debug_data(self):
+        return self._debug_data
 
     def approximate_max_probabilities(self, number_of_treatments, context):
         if number_of_treatments != 2:
@@ -53,10 +58,8 @@ class FastNormalApproximation:
 
         p = stats.norm.sf(0, mean, std)
 
-        if len(df) == 2 and p < 0.01:
-            import pdb
+        self._debug_data = {"p": p}
 
-            pdb.set_trace()
         if numpy.isnan(p):
             return [0.5, 0.5]
         return [p, 1 - p]

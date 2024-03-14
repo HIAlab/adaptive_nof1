@@ -56,7 +56,7 @@ class SelfExperimentationModel(Model):
 
     @property
     def additional_config(self):
-        return {"true_intervention_effect": self.intervention_effects[1]}
+        return {"true_intervention_effects": self.intervention_effects}
 
     def generate_context(self, history):
         if len(history) == 0:

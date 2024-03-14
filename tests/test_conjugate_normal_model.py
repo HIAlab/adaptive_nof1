@@ -13,13 +13,15 @@ from .helper_functions import outcomes_to_history
     "treatments, priors, outcomes, expected",
     [
         ([0, 0, 1, 1], (2.5, 5, 1, 1), [3, 3, 3, 3], [0.5, 0.5]),
-        ([0, 0, 1, 1], (2.5, 5, 1, 1), [3, 3, 5, 4], [0.30, 0.70]),
+        ([0, 0, 1, 1], (2.5, 5, 1, 1), [3, 3, 5, 4], [0.28, 0.72]),
     ],
 )
 def test_conjugate_normal_model(treatments, priors, outcomes, expected):
     number_of_treatments = 2
     m, k, alpha, beta = priors
-    model = ConjugateNormalModel(mean=m, l=k, alpha=alpha, beta=beta, seed=42)
+    model = ConjugateNormalModel(
+        mean=m, l=k, alpha=alpha, beta=beta, seed=42, sample_size=5000
+    )
     model.update_posterior(
         outcomes_to_history(treatments, outcomes), number_of_treatments
     )

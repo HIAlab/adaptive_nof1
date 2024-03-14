@@ -28,7 +28,7 @@ class Observation:
     outcome: Outcome
     t: int
     patient_id: int
-    debug_data: List[dict] = field(default_factory=lambda: [])
+    debug_data: dict = field(default_factory=lambda: {})
     debug_information: str = ""
     counterfactual_outcomes: List[Outcome] = field(default_factory=lambda: [])
 

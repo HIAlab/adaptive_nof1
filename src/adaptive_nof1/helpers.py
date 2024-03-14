@@ -1,6 +1,8 @@
 from typing import Dict, List
 import itertools
 import numpy
+import pandas
+import jsonpickle
 
 seperator = "#"
 
@@ -49,6 +51,13 @@ def values_to_index(dimensions, values):
     return index
 
 
+# Counts the number of occurences of each number an returns a list.
+# List[a] == number of occurences of a in values
+def index_to_value_counts(dimensions, index):
+    values = index_to_values(dimensions, index)
+    return list(numpy.bincount(values, minlength=max(dimensions)))
+
+
 def index_to_actions(index, dimensions, names):
     values = index_to_values(dimensions, index)
     return {name: action for name, action in zip(names, values)}
@@ -78,7 +87,7 @@ def flatten_dictionary(dict):
         if isinstance(value, (list, numpy.ndarray)):
             # If the value is a list or NumPy array, iterate through its elements
             for i, elem in enumerate(value):
-                new_key = f"{key}_{i}"
+                new_key = f"{key}_{i+1}"
                 new_dict[new_key] = elem
         else:
             # For non-list or non-array values, just copy them to the new dictionary
@@ -113,3 +122,35 @@ def generate_configuration_cross_product(configuration_specification):
 
 def contains_keys(dict, keys):
     return all(key in dict for key in keys)
+
+
+# Allows plotting mean(SD) format
+def groupby_to_combined_table(table):
+    # You need to define 'metrics' with the names of your metrics
+    metrics = table.columns.levels[0]
+    metrics = metrics.drop(["policy", "model", "S", "Policy"], errors="ignore")
+
+    def combine_mean_std(row):
+        """
+        For each row, combine the mean and std columns into a single string formatted as 'mean (std)'.
+        Assumes that row contains sub-columns 'mean' and 'std' for each metric.
+        """
+        combined = [
+            f"{row[(metric, 'mean')]:.2f} ({row[(metric, 'std')]:.2f})"
+            for metric in metrics
+        ]
+        return pandas.Series(combined, index=metrics)
+
+    # Apply the function to combine mean and std
+    combined_table = table.apply(combine_mean_std, axis=1)
+    return combined_table
+
+
+def write_to_disk(filename, data):
+    with open(filename, "w") as file:
+        file.write(jsonpickle.encode(data))
+
+
+def load_from_disk(filename):
+    with open(filename, "r") as file:
+        return jsonpickle.decode(file.read())

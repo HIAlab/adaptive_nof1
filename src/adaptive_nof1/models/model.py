@@ -9,6 +9,10 @@ class Model(ABC):
         pass
 
     @property
+    def number_of_interventions(self):
+        pass
+
+    @property
     def additional_config(self):
         return {}
 

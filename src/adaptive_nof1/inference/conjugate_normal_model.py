@@ -11,14 +11,16 @@ class ConjugateNormalModel:
         treatment_name="treatment",
         outcome_name="outcome",
         mean=0,
-        l=0,
-        alpha=0,
-        beta=0,
+        l=1.0,
+        alpha=1,
+        beta=1,
+        sample_size=1000,
         seed=None,
     ):
         self.treatment_name = treatment_name
         self.outcome_name = outcome_name
         self.rng = numpy.random.default_rng(seed)
+        self.sample_size = sample_size
         invgamma.random_state = self.rng
         norm.random_state = self.rng
 
@@ -74,23 +76,19 @@ class ConjugateNormalModel:
             + self.n(intervention)
             * self.l
             * (self.sample_mean(intervention) - self.mean) ** 2
-            / (self.l + self.n(intervention))
-            * 2
+            / ((self.l + self.n(intervention)) * 2)
         )
 
-    def sample_normal_inverse_gamma(
-        self, mean, l, alpha, beta, sample_size, number_of_treatments
-    ):
+    def sample_normal_inverse_gamma(self, mean, l, alpha, beta, number_of_treatments):
         # Sample from our updated distributions
-        sample_size = 1000
         invgamma.random_state = self.rng
         sigma_squared_samples = invgamma.rvs(
-            a=alpha, scale=beta, size=(sample_size, number_of_treatments)
+            a=alpha, scale=beta, size=(self.sample_size, number_of_treatments)
         )
         samples = norm.rvs(
             loc=mean,
             scale=numpy.sqrt(sigma_squared_samples / l),
-            size=(sample_size, number_of_treatments),
+            size=(self.sample_size, number_of_treatments),
         )
         return samples
 
@@ -100,7 +98,9 @@ class ConjugateNormalModel:
             self.l[intervention] * self.alpha[intervention]
         )
         return scipy.stats.t(
-            df=2 * self.alpha[intervention], loc=self.mean[intervention], scale=scale
+            df=2 * self.alpha[intervention],
+            loc=self.mean[intervention],
+            scale=scale,
         )
 
     def approximate_max_probabilities(self, number_of_treatments, context):
@@ -121,9 +121,8 @@ class ConjugateNormalModel:
 
         self._debug_data = {"mean": mean, "l": l, "alpha": alpha, "beta": beta}
 
-        sample_size = 1000
         samples = self.sample_normal_inverse_gamma(
-            mean, l, alpha, beta, sample_size, number_of_treatments
+            mean, l, alpha, beta, number_of_treatments
         )
 
         max_indices = numpy.argmax(samples, axis=1)
