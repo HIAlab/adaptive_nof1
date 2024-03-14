@@ -21,7 +21,7 @@ def test_extraction_of_best_arm(simple_history):
     )
     best_arms = metric.best_arm_per_timestep(data)
     assert len(best_arms) == 3
-    assert list(best_arms) == [0, 1, 1]
+    assert list(best_arms) == [0, 1, 2]
 
 
 # In this test case, the best arm is arm 2 with a mean of 3.
@@ -38,4 +38,4 @@ def test_calculation_of_score(simple_history):
     )
     score = metric.score(data)
     assert len(score) == 3
-    assert list(score) == [2, 1, 1]
+    assert list(score) == [2, 1, 0]

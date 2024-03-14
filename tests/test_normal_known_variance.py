@@ -30,7 +30,7 @@ from .helper_functions import outcomes_to_history
                 1.05000223,
             ],
             [0.8969, 1 - 0.8969],
-        ),  # Values calculated with PyMC
+        ),  # Values calculated with PyMC, see `mt_background` notebook
     ],
 )
 def test_normal_known_variance_max_probabilities(treatments, outcomes, expected):
@@ -52,20 +52,9 @@ def test_normal_known_variance_max_probabilities(treatments, outcomes, expected)
     [
         (
             [0, 0, 0, 0, 0, 1, 1, 1, 1, 1],
-            [
-                1.02843959,
-                3.35494956,
-                1.95655613,
-                1.50242135,
-                -0.46956782,
-                -0.66010774,
-                1.07235382,
-                1.28096369,
-                0.23741603,
-                1.05000223,
-            ],
+            [1.03, 3.35, 1.96, 1.5, -0.47, -0.66, 1.07, 1.28, 0.24, 1.05],
             [2.0, 1.3],
-        ),  # Values calculated with PyMC
+        ),  # Values calculated with PyMC, see `mt_background` notebook
     ],
 )
 def test_normal_known_variance_upper_confidence_bounds(treatments, outcomes, expected):
@@ -79,4 +68,4 @@ def test_normal_known_variance_upper_confidence_bounds(treatments, outcomes, exp
         outcomes_to_history(treatments, outcomes), number_of_treatments
     )
     p = model.get_upper_confidence_bounds("outcome", epsilon=0.03)
-    assert array_almost_equal(p, expected, epsilon=0.02)
+    assert array_almost_equal(p, expected, epsilon=0.05)

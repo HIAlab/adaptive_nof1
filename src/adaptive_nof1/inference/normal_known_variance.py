@@ -31,6 +31,9 @@ class NormalKnownVariance:
         self.df = None
         self._debug_data = {"mean": prior_mean, "variance": prior_variance}
 
+    # This is an upper bound for the mean effect.
+    # One could also upper bound the reward, which would add additional variance from self.variance.
+    # For selection in UCB, this is irrelevant, since the max is chosen anyway.
     def get_upper_confidence_bounds(self, variable_name, epsilon: float = 0.05):
         assert variable_name == self.outcome_name, "Only outcome variable supported"
         assert (
@@ -40,7 +43,7 @@ class NormalKnownVariance:
         upper_confidence_bounds = norm.ppf(
             1 - epsilon,
             loc=mean,
-            scale=numpy.sqrt(numpy.array(variance) + self.variance),
+            scale=numpy.sqrt(numpy.array(variance)),
         )
         return upper_confidence_bounds
 
@@ -74,7 +77,7 @@ class NormalKnownVariance:
         )
 
     def variance_update(self, intervention):
-        return 1 / ((1 / self.prior_variance) + self.n(intervention) / self.variance)
+        return 1.0 / ((1.0 / self.prior_variance) + self.n(intervention) / self.variance)
 
     def sample_posterior_predictive(
         self, mean, variance, sample_size, number_of_treatments
