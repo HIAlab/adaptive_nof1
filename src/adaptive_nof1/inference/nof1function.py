@@ -10,6 +10,7 @@ try:
     import rpy2.robjects as ro
     from rpy2.robjects.packages import importr
     from rpy2.robjects import pandas2ri
+
     has_rpy2 = True
 except ImportError:
     has_rpy2 = False
@@ -20,7 +21,9 @@ if has_rpy2:
     # Source code can be found at https://github.com/joannamwalsh/nofone
     # Installation requires installing r2py.
     class Nof1Function:
-        def __init__(self, treatment_name="treatment", outcome_name="outcome", seed=None):
+        def __init__(
+            self, treatment_name="treatment", outcome_name="outcome", seed=None
+        ):
             self.probabilities = [0.5, 0.5]
             self.setup_r_function()
             self.treatment_name = treatment_name
