@@ -65,8 +65,6 @@ class SequentialHalving(Policy):
         return sorted_indices[:k]
 
     def choose_action(self, history, context):
-        self.rng = numpy.random.default_rng()
-
         self.inference.update_posterior(history, self.number_of_actions)
         inference_debug_data = self.inference.debug_data
         self._debug_information += [""]
@@ -84,8 +82,8 @@ class SequentialHalving(Policy):
                 to_remove = self.k_lowest_indices(probabilities, k)
                 self.treatments_to_consider = [
                     item
-                    for item in self.treatments_to_consider
-                    if item not in to_remove
+                    for index, item in enumerate(self.treatments_to_consider)
+                    if index not in to_remove
                 ]
 
             # generate a random permutation of treatments

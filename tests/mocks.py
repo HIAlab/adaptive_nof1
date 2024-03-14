@@ -20,3 +20,7 @@ class MockBayesianModel:
 
     def update_posterior(self, history, number_of_treatments):
         pass
+
+    @property
+    def debug_data(self):
+        return {}
