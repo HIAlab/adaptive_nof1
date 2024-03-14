@@ -13,6 +13,7 @@ dependencies = [
     'panel',
     'hvplot',
     'frozendict',
+    'jsonpickle',
 ]
 
 [project.optional-dependencies]
