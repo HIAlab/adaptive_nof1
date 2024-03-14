@@ -77,7 +77,9 @@ class NormalKnownVariance:
         )
 
     def variance_update(self, intervention):
-        return 1.0 / ((1.0 / self.prior_variance) + self.n(intervention) / self.variance)
+        return 1.0 / (
+            (1.0 / self.prior_variance) + self.n(intervention) / self.variance
+        )
 
     def sample_posterior_predictive(
         self, mean, variance, sample_size, number_of_treatments

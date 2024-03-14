@@ -19,7 +19,9 @@ from .helper_functions import outcomes_to_history
 def test_conjugate_normal_model(treatments, priors, outcomes, expected):
     number_of_treatments = 2
     m, k, alpha, beta = priors
-    model = ConjugateNormalModel(mean=m, l=k, alpha=alpha, beta=beta, seed=42, sample_size=5000)
+    model = ConjugateNormalModel(
+        mean=m, l=k, alpha=alpha, beta=beta, seed=42, sample_size=5000
+    )
     model.update_posterior(
         outcomes_to_history(treatments, outcomes), number_of_treatments
     )
