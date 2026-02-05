@@ -61,6 +61,8 @@ class NormalKnownVariance:
         return len(self.series(intervention))
 
     def series(self, intervention):
+        if len(self.df) == 0:
+            return numpy.array([])
         return self.df[self.df[self.treatment_name] == intervention][self.outcome_name]
 
     def var(self, intervention):

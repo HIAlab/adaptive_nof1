@@ -7,7 +7,7 @@ class ConstantPolicy(Policy):
         super().__init__(**kwargs)
 
     def __str__(self):
-        return f"ConstantPolicy: {self.action}.\n"
+        return f"ConstantPolicy: {self.action}"
 
     def choose_action(self, *_):
         self._debug_data.append({})

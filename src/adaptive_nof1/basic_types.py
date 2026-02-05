@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import List, Dict
 
 import matplotlib
+import numpy
 import pandas
 import seaborn as sb
 
@@ -95,6 +96,12 @@ class History:
 
     def debug_data(self):
         return [observation.debug_data for observation in self.observations]
+
+    def outcomes(self, outcome_name="outcome"):
+        """Return outcomes as a numpy array."""
+        return numpy.array([
+            observation.outcome[outcome_name] for observation in self.observations
+        ])
 
     def __getitem__(self, index) -> History:
         if isinstance(index, slice):

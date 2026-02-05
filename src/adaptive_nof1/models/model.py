@@ -9,7 +9,7 @@ class Model(ABC):
         pass
 
     @property
-    def number_of_interventions(self):
+    def number_of_interventions(self) -> int | None:
         pass
 
     @property
@@ -21,7 +21,7 @@ class Model(ABC):
         pass
 
     @abstractmethod
-    def observe_outcome(self, action, context) -> Observation:
+    def observe_outcome(self, action, context) -> Observation | None:
         pass
 
     def reset(self):

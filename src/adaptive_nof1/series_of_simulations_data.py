@@ -122,6 +122,54 @@ class SeriesOfSimulationsData:
             )
         return ax
 
+    @staticmethod
+    def plot_individual_regret(
+        list_of_series: List[SeriesOfSimulationsData],
+        metrics: List[Metric],
+        individual_id_column: str = "manuscript_ID",
+        hue: str = "policy",
+        individual_id_label: str | None = None,
+    ):
+        scored_df = score_df(
+            [
+                simulation
+                for series in list_of_series
+                for simulation in series.simulations
+            ],
+            metrics,
+            minmax_normalization=False,
+        )
+
+        simulation_to_individual = {}
+        for series in list_of_series:
+            for simulation in series.simulations:
+                history_df = simulation.history.to_df()
+                if individual_id_column in history_df.columns:
+                    id_series = history_df[individual_id_column].dropna()
+                    if not id_series.empty:
+                        simulation_to_individual[str(simulation)] = id_series.iloc[0]
+                        continue
+                simulation_to_individual[str(simulation)] = simulation.patient_id
+
+        scored_df["individual_id"] = scored_df["simulation"].map(simulation_to_individual)
+        final_df = scored_df.loc[
+            scored_df.groupby(["simulation", "metric"])["t"].idxmax()
+        ]
+
+        ax = seaborn.stripplot(
+            data=final_df,
+            x="score",
+            y="individual_id",
+            hue=hue,
+            dodge=True,
+        )
+        ax.set(
+            xlabel="Regret",
+            ylabel=individual_id_label or individual_id_column,
+        )
+        seaborn.move_legend(ax, "upper left", bbox_to_anchor=(1, 1))
+        return ax
+
     def serialize(self):
         return pickle.dumps(self)
 
@@ -245,12 +293,17 @@ def plot_allocations_for_calculated_series(calculated_series):
             series["result"].pooled_histories().to_df()["treatment"].agg(["min", "max"])
         )
         panels.append(
-            series["result"].plot_allocations()
-            + series["result"].draw_legend(min + 1, max + 2)
+            (
+                series["result"].plot_allocations()
+                + series["result"].draw_legend(min + 1, max + 2)
+            ).relabel(
+                f"{series['configuration']['policy']}, "
+                f"{series['configuration']['model']}"
+            )
         )
     for panel, i in zip(panels, range(len(panels))):
         panel.opts(
             title=f"{calculated_series[i]['configuration']['policy']}, {calculated_series[i]['configuration']['model']}",
-            fontsize={"title": "80%"},
+            fontsize={"title": "20%"},
         )
     return holoviews.Layout(panels).cols(2)

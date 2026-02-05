@@ -2,6 +2,7 @@ import numpy
 
 import pandas
 import scipy
+import pandas as pd
 
 
 ## Code from: https://github.com/tonyduan/conjugate-bayes/blob/master/conjugate_bayes/models.py
@@ -56,11 +57,18 @@ class BayesianLinearRegressionModel:
         v=0,
         alpha=0,
         beta=0,
+        covariate_names=None,
+        categorical_covariates=None,
+        name=None,
     ):
         self.treatment_name = treatment_name
         self.outcome_name = outcome_name
+        self.covariate_names = covariate_names or []
+        self.categorical_covariates = categorical_covariates or {}
+        self.name = name
 
-        self.mean = mean
+        # Ensure mean is a numpy array
+        self.mean = numpy.asarray(mean) if not isinstance(mean, numpy.ndarray) else mean
         self.v = v
         self.alpha = alpha
         self.beta = beta
@@ -70,14 +78,75 @@ class BayesianLinearRegressionModel:
             mu=self.mean, v=self.v, a=self.alpha, b=self.beta
         )
 
+        # Validate categorical covariates
+        for col, categories in self.categorical_covariates.items():
+            if col not in self.covariate_names:
+                self.covariate_names.append(col)
+
+    def _prepare_design_matrix(self, df, number_of_treatments):
+        """
+        Prepare design matrix with treatment dummies and covariates, including one-hot encoded categorical covariates.
+
+        Parameters
+        ----------
+        df : pandas.DataFrame
+            The dataframe containing treatment and outcome columns
+        number_of_treatments : int
+            Number of treatments
+
+        Returns
+        -------
+        numpy.ndarray
+            Design matrix with treatment dummies and covariates
+        """
+        # Get treatment dummies
+        treatment_dummies = (
+            pandas.get_dummies(
+                pandas.Categorical(
+                    df[self.treatment_name], categories=range(number_of_treatments)
+                )
+            )
+            .to_numpy()
+            .astype(float)
+        )
+
+        # Prepare covariates matrix
+        covariates_list = [treatment_dummies]
+
+        # Handle categorical covariates with one-hot encoding
+        for col, categories in self.categorical_covariates.items():
+            # Create categorical with predefined categories to ensure consistency
+            cat_series = pandas.Categorical(df[col], categories=range(categories))
+            # Get dummies, converting to numpy
+            col_dummies = pandas.get_dummies(cat_series).to_numpy().astype(float)
+            covariates_list.append(col_dummies)
+
+        # Add continuous covariates
+        continuous_covariates_cols = [
+            col
+            for col in self.covariate_names
+            if col not in self.categorical_covariates
+        ]
+        if continuous_covariates_cols:
+            continuous_data = df[continuous_covariates_cols].to_numpy().astype(float)
+            covariates_list.append(continuous_data)
+
+        # Combine all covariates
+        design_matrix = numpy.hstack(covariates_list)
+
+        return design_matrix
+
     def get_upper_confidence_bounds(self, variable_name, epsilon: float = 0.05):
         raise AssertionError("Not implemented")
 
     def update_posterior(self, history, number_of_treatments):
         self.history = history
-
-    def __str__(self):
-        return "BayesianLinearRegression"
+        if len(history.observations) == 0:
+            return
+        self.model.fit(
+            self._prepare_design_matrix(self.history.to_df(), number_of_treatments),
+            self.history.outcomes(),
+        )
 
     def series(self, intervention):
         return self.df[self.df[self.treatment_name] == intervention][self.outcome_name]
@@ -87,59 +156,104 @@ class BayesianLinearRegressionModel:
         return self.model.predict([identity_matrix[intervention]])
 
     def approximate_max_probabilities(self, number_of_treatments, context):
-        assert len(self.mean) == number_of_treatments, "Wrong shape for mean"
-        assert self.v.shape == (
-            number_of_treatments,
-            number_of_treatments,
-        ), "Wrong shape for v"
+        # Use the current context to prepare the design matrix
+        # Convert context to DataFrame for design matrix preparation
 
-        self.df = self.history.to_df()
-        if len(self.df) == 0:
-            return [0.5, 0.5]
-
-        x = (
-            pandas.get_dummies(
-                pandas.Categorical(
-                    self.df[self.treatment_name], categories=range(number_of_treatments)
-                )
-            )
-            .to_numpy()
-            .astype(float)
+        # Prepare a DataFrame with current context
+        context_df = pd.DataFrame(
+            {
+                self.treatment_name: list(range(number_of_treatments)),
+                **{
+                    col: [context.get(col, 0)] * number_of_treatments
+                    for col in self.covariate_names
+                },
+            }
         )
-        # print(x)
-        # print(x.shape)
+
+        # If categorical covariates are specified, add those
+        for col, categories in self.categorical_covariates.items():
+            # Use the current context value or default to 0
+            context_df[col] = context.get(col, 0)
+
+        # Prepare design matrix with current context
+        x = self._prepare_design_matrix(context_df, number_of_treatments)
+
+        # If no history, fall back to uniform sampling
+        if not hasattr(self, "history") or len(self.history.observations) == 0:
+            return [1 / number_of_treatments] * number_of_treatments
+
+        # Convert history to DataFrame
+        self.df = self.history.to_df()
+
+        # If no historical data, initialize model with priors
         self.model = NIGLinearRegression(
             mu=self.mean, v=self.v, a=self.alpha, b=self.beta
         )
-        self.model.fit(x, self.df[self.outcome_name])
-        # print(model.mu)
+
+        # If we have historical data, fit the model
+        if len(self.df) > 0:
+            # Prepare historical design matrix
+            x_history = self._prepare_design_matrix(self.df, number_of_treatments)
+
+            # Fit the model with historical data
+            self.model.fit(x_history, self.df[self.outcome_name])
 
         sample_size = 1000
         identity_matrix = numpy.eye(number_of_treatments)
+
+        # Sample predictions using the current context
         samples = numpy.array(
             [
-                self.model.predict([identity_matrix[intervention]]).rvs(
-                    size=sample_size
-                )
+                self.model.predict(
+                    self._create_prediction_points(
+                        identity_matrix[intervention],
+                        x[intervention, number_of_treatments:],  # Use context values
+                    )
+                ).rvs(size=sample_size)
                 for intervention in range(number_of_treatments)
             ]
         )
+
         max_indices = numpy.argmax(samples, axis=0)
-        # print(samples)
         bin_counts = numpy.bincount(max_indices, minlength=number_of_treatments)
         return bin_counts / numpy.sum(bin_counts)
 
+    def _create_prediction_points(self, treatment_point, covariate_values=None):
+        """
+        Create prediction points by combining treatment dummies with covariate values.
+
+        Parameters
+        ----------
+        treatment_point : numpy.ndarray
+            One-hot encoded treatment vector
+        covariate_values : numpy.ndarray, optional
+            Mean or specific covariate values
+
+        Returns
+        -------
+        numpy.ndarray
+            Combined treatment and covariate values for prediction
+        """
+        if covariate_values is None:
+            return treatment_point.reshape(1, -1)
+
+        return numpy.hstack([treatment_point, covariate_values]).reshape(1, -1)
+
+    def __str__(self):
+        return f"BayesianLinearRegressionModel{self.name}"
+
+    @property
     def debug_data(self):
         if not self.model:
             return {
-                "mean": self.mean,
-                "v": self.v,
-                "alpha": self.alpha,
-                "beta": self.beta,
+                "mean": numpy.round(self.mean, 2),
+                "v": numpy.round(self.v, 2),
+                "alpha": numpy.round(self.alpha, 2),
+                "beta": numpy.round(self.beta, 2),
             }
         return {
-            "mean": self.model.mu,
-            "v": self.model.v,
-            "alpha": self.model.a,
-            "beta": self.model.b,
+            "mean": numpy.round(self.model.mu, 2),
+            "v": numpy.round(self.model.v, 2),
+            "alpha": numpy.round(self.model.a, 2),
+            "beta": numpy.round(self.model.b, 2),
         }
